@@ -1,0 +1,1519 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{er,positioning}
+
+% Page setup
+\geometry{left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% SQL code formatting
+\lstdefinestyle{sqlstyle}{
+    language=SQL,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    captionpos=b
+}
+
+% Section formatting for professional look
+\titleformat{\section}
+{\normalfont\Large\bfseries}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries}
+{\thesubsection}{1em}{}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=black
+}
+
+\begin{document}
+
+% Professional Cover Page following the specified format
+\begin{titlepage}
+    \centering
+    
+    % University logo placeholder (top center)
+    \vspace*{1.5cm}
+    \begin{figure}[h]
+        \centering
+        % University logo would go here
+        \includegraphics[width=0.15\textwidth]{university_logo.png}
+    \end{figure}
+    
+    \vspace{0.5cm}
+    
+    % University name
+    {\LARGE\textbf{University of Dhaka}}\\[0.3cm]
+    {\large Department of Computer Science and Engineering}\\[1.5cm]
+    
+    % Course code and name
+    {\Large\textbf{CSE2211: Database Management Systems-I}}\\[1.5cm]
+    
+    % Horizontal lines with project type
+    \rule{\textwidth}{1pt}\\[0.3cm]
+    {\large\textbf{Lab Project - University Research Portal}}\\[0.3cm]
+    \rule{\textwidth}{1pt}\\[2cm]
+    
+    % Lab group
+    {\large\textbf{Lab Group: B (EVEN)}}\\[1cm]
+    
+    % Student information (centered format)
+    Farhana Alam (48)\\
+    Sara Faria (58)\\[2cm]
+    
+    % Submitted to section
+    {\large\textbf{Submitted To:}}\\[0.5cm]
+    Mr. Abu Ahmed Ferdaus, Dept. of CSE, University of Dhaka\\
+    Mr. Redwan Ahmed Rizvee, Dept. of CSE, University of Dhaka\\[2cm]
+    
+    \vfill
+    
+    % Submission date at bottom
+    {\large\textbf{Submission Date: \today}}
+    
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
+
+\section{Introduction}
+
+\subsection{Project Overview}
+This project presents a comprehensive University Research Database Management System designed to manage academic research activities, faculty information, student participation, publications, and funding sources. The system provides a robust framework for tracking research projects, collaborations, and academic outputs within a university environment.
+
+\subsection{Objectives}
+The primary objectives of this database system are:
+\begin{itemize}
+    \item To efficiently manage faculty and student information
+    \item To track research projects and their collaborators
+    \item To maintain publication records and authorship details
+    \item To monitor funding sources and project financing
+    \item To provide comprehensive reporting capabilities
+    \item To ensure data integrity through proper constraints
+\end{itemize}
+
+\subsection{Scope}
+The database system encompasses:
+\begin{itemize}
+    \item Department and faculty management
+    \item Student enrollment and research participation tracking
+    \item Research project lifecycle management
+    \item Publication and citation tracking
+    \item Funding source and project financing
+    \item Comprehensive query and reporting capabilities
+\end{itemize}
+
+\section{Database Design}
+
+\subsection{Entity-Relationship Model}
+The University Research Database consists of the following main entities:
+\begin{itemize}
+    \item \textbf{DEPARTMENTS}: Academic departments within the university
+    \item \textbf{FACULTY}: Teaching and research staff members
+    \item \textbf{STUDENTS}: Graduate students (Masters and PhD)
+    \item \textbf{RESEARCH\_PROJECTS}: Active and completed research initiatives
+    \item \textbf{PUBLICATIONS}: Academic publications and papers
+    \item \textbf{FUNDING\_SOURCES}: Organizations providing research funding
+\end{itemize}
+
+\subsection{Schema Diagram}
+The database schema consists of 10 interconnected tables with various relationships including one-to-many, many-to-many, and hierarchical structures.
+
+\begin{figure}[H]
+    \centering
+    % Schema diagram placeholder
+    \includegraphics[width=\textwidth]{schema_diagram.png}
+    \caption{Database Schema Diagram}
+    \label{fig:schema}
+\end{figure}
+
+\subsection{Entity-Relationship Diagram}
+The ER diagram illustrates the relationships between different entities in the system.
+
+\begin{figure}[H]
+    \centering
+    % ER diagram placeholder
+    \includegraphics[width=\textwidth]{er_diagram.png}
+    \caption{Entity-Relationship Diagram}
+    \label{fig:er}
+\end{figure}
+
+\section{Database Implementation}
+
+\subsection{Tables and Attributes}
+
+\subsubsection{DEPARTMENTS Table}
+The DEPARTMENTS table stores information about academic departments.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Attribute} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\hline
+dept\_id & NUMBER & PRIMARY KEY & Department identifier \\
+dept\_name & VARCHAR2(100) & NOT NULL, UNIQUE & Department name \\
+dept\_head & VARCHAR2(100) & & Department head name \\
+research\_focus & VARCHAR2(500) & & Primary research areas \\
+established\_year & NUMBER(4) & CHECK > 1900 & Year established \\
+budget & NUMBER(12,2) & CHECK >= 0 & Department budget \\
+\hline
+\end{tabular}
+\caption{DEPARTMENTS Table Structure}
+\end{table}
+
+\subsubsection{FACULTY Table}
+The FACULTY table contains information about faculty members.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Attribute} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\hline
+faculty\_id & NUMBER & PRIMARY KEY & Faculty identifier \\
+first\_name & VARCHAR2(50) & NOT NULL & Faculty first name \\
+last\_name & VARCHAR2(50) & NOT NULL & Faculty last name \\
+email & VARCHAR2(100) & UNIQUE, NOT NULL & Email address \\
+phone & VARCHAR2(15) & & Phone number \\
+hire\_date & DATE & NOT NULL & Date of hiring \\
+position & VARCHAR2(50) & CHECK constraint & Academic position \\
+dept\_id & NUMBER & FOREIGN KEY & Department reference \\
+salary & NUMBER(10,2) & CHECK > 0 & Annual salary \\
+research\_interests & VARCHAR2(1000) & & Research areas \\
+\hline
+\end{tabular}
+\caption{FACULTY Table Structure}
+\end{table}
+
+\subsubsection{STUDENTS Table}
+The STUDENTS table manages graduate student information.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Attribute} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\hline
+student\_id & NUMBER & PRIMARY KEY & Student identifier \\
+first\_name & VARCHAR2(50) & NOT NULL & Student first name \\
+last\_name & VARCHAR2(50) & NOT NULL & Student last name \\
+email & VARCHAR2(100) & UNIQUE, NOT NULL & Email address \\
+enrollment\_date & DATE & NOT NULL & Enrollment date \\
+program\_type & VARCHAR2(20) & CHECK constraint & Masters or PhD \\
+dept\_id & NUMBER & FOREIGN KEY & Department reference \\
+advisor\_id & NUMBER & FOREIGN KEY & Faculty advisor \\
+graduation\_date & DATE & & Graduation date \\
+\hline
+\end{tabular}
+\caption{STUDENTS Table Structure}
+\end{table}
+
+\subsubsection{RESEARCH\_PROJECTS Table}
+This table tracks research projects and their details.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Attribute} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\hline
+project\_id & NUMBER & PRIMARY KEY & Project identifier \\
+project\_title & VARCHAR2(200) & NOT NULL & Project title \\
+description & CLOB & & Project description \\
+start\_date & DATE & NOT NULL & Project start date \\
+end\_date & DATE & & Project end date \\
+status & VARCHAR2(20) & CHECK constraint & Project status \\
+total\_budget & NUMBER(12,2) & CHECK >= 0 & Total budget \\
+principal\_investigator & NUMBER & FOREIGN KEY & PI faculty reference \\
+dept\_id & NUMBER & FOREIGN KEY & Department reference \\
+\hline
+\end{tabular}
+\caption{RESEARCH\_PROJECTS Table Structure}
+\end{table}
+
+\subsection{SQL DDL Statements}
+
+\subsection{DEPARTMENTS Table Creation}
+\begin{lstlisting}[style=sqlstyle]
+CREATE TABLE DEPARTMENTS (
+    dept_id NUMBER PRIMARY KEY,
+    dept_name VARCHAR2(100) NOT NULL UNIQUE,
+    dept_head VARCHAR2(100),
+    research_focus VARCHAR2(500),
+    established_year NUMBER(4) CHECK (established_year > 1900),
+    budget NUMBER(12,2) CHECK (budget >= 0)
+);
+\end{lstlisting}
+
+\subsection{FACULTY Table Creation}
+\begin{lstlisting}[style=sqlstyle]
+CREATE TABLE FACULTY (
+    faculty_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone VARCHAR2(15),
+    hire_date DATE NOT NULL,
+    position VARCHAR2(50) CHECK (position IN ('Professor', 'Associate Professor', 'Assistant Professor', 'Lecturer')),
+    dept_id NUMBER,
+    salary NUMBER(10,2) CHECK (salary > 0),
+    research_interests VARCHAR2(1000),
+    CONSTRAINT fk_faculty_dept FOREIGN KEY (dept_id) REFERENCES DEPARTMENTS(dept_id)
+);
+\end{lstlisting}
+
+\subsection{STUDENTS Table Creation}
+\begin{lstlisting}[style=sqlstyle]
+CREATE TABLE STUDENTS (
+    student_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    enrollment_date DATE NOT NULL,
+    program_type VARCHAR2(20) CHECK (program_type IN ('Masters', 'PhD')),
+    dept_id NUMBER,
+    advisor_id NUMBER,
+    graduation_date DATE,
+    CONSTRAINT fk_student_dept FOREIGN KEY (dept_id) REFERENCES DEPARTMENTS(dept_id),
+    CONSTRAINT fk_student_advisor FOREIGN KEY (advisor_id) REFERENCES FACULTY(faculty_id)
+);
+\end{lstlisting}
+
+\subsection{Remaining Tables}
+\begin{lstlisting}[style=sqlstyle]
+-- RESEARCH_PROJECTS Table
+CREATE TABLE RESEARCH_PROJECTS (
+    project_id NUMBER PRIMARY KEY,
+    project_title VARCHAR2(200) NOT NULL,
+    description CLOB,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    status VARCHAR2(20) CHECK (status IN ('Active', 'Completed', 'On Hold', 'Cancelled')),
+    total_budget NUMBER(12,2) CHECK (total_budget >= 0),
+    principal_investigator NUMBER,
+    dept_id NUMBER,
+    CONSTRAINT fk_project_pi FOREIGN KEY (principal_investigator) REFERENCES FACULTY(faculty_id),
+    CONSTRAINT fk_project_dept FOREIGN KEY (dept_id) REFERENCES DEPARTMENTS(dept_id)
+);
+
+-- PROJECT_COLLABORATORS Table
+CREATE TABLE PROJECT_COLLABORATORS (
+    project_id NUMBER,
+    faculty_id NUMBER,
+    role VARCHAR2(50) NOT NULL,
+    contribution_percentage NUMBER(5,2) CHECK (contribution_percentage BETWEEN 0 AND 100),
+    PRIMARY KEY (project_id, faculty_id),
+    CONSTRAINT fk_collab_project FOREIGN KEY (project_id) REFERENCES RESEARCH_PROJECTS(project_id),
+    CONSTRAINT fk_collab_faculty FOREIGN KEY (faculty_id) REFERENCES FACULTY(faculty_id)
+);
+
+-- Additional tables...
+\end{lstlisting}
+
+\subsection{Sample Data}
+Sample data has been inserted into all tables to demonstrate the database functionality.
+
+\begin{figure}[H]
+    \centering
+    % Sample data screenshot placeholder
+    \includegraphics[width=\textwidth]{sample_data_departments.png}
+    \caption{Sample Data - DEPARTMENTS Table}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Sample data screenshot placeholder
+    \includegraphics[width=\textwidth]{sample_data_faculty.png}
+    \caption{Sample Data - FACULTY Table}
+\end{figure}
+
+\section{Query Examples}
+
+\subsection{Basic Queries}
+
+\subsubsection{List all faculty with their departments}
+\textbf{Query Statement:} Retrieve all faculty members along with their department information.
+
+\textbf{Relational Algebra:}
+$$\pi_{first\_name, last\_name, position, dept\_name}(FACULTY \bowtie DEPARTMENTS)$$
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT f.first_name, f.last_name, f.position, d.dept_name
+FROM FACULTY f
+NATURAL JOIN DEPARTMENTS d
+ORDER BY d.dept_name, f.last_name;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query1_result.png}
+    \caption{Query 1 Result - Faculty with Departments}
+\end{figure}
+
+\subsection{Find all active research projects}
+\textbf{Query Statement:} List all research projects that are currently active.
+
+\textbf{Relational Algebra:}
+$$\sigma_{status='Active'}(RESEARCH\_PROJECTS)$$
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT project_title, start_date, total_budget
+FROM RESEARCH_PROJECTS
+WHERE status = 'Active'
+ORDER BY start_date DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query2_result.png}
+    \caption{Query 2 Result - Active Research Projects}
+\end{figure}
+
+\subsection{Join Operations}
+
+\subsection{Natural Join}
+\textbf{Query Statement:} Find students with their advisor information using natural join.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT s.first_name AS student_name, s.last_name AS student_surname,
+       f.first_name AS advisor_name, f.last_name AS advisor_surname,
+       d.dept_name
+FROM STUDENTS s
+NATURAL JOIN DEPARTMENTS d
+JOIN FACULTY f ON s.advisor_id = f.faculty_id
+ORDER BY d.dept_name;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query3_result.png}
+    \caption{Query 3 Result - Students with Advisors (Natural Join)}
+\end{figure}
+
+\subsection{Outer Join}
+\textbf{Query Statement:} List all faculty and their research projects (including faculty without projects).
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT f.first_name, f.last_name, rp.project_title, rp.status
+FROM FACULTY f
+LEFT OUTER JOIN RESEARCH_PROJECTS rp ON f.faculty_id = rp.principal_investigator
+ORDER BY f.last_name;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query4_result.png}
+    \caption{Query 4 Result - Faculty with Projects (Left Outer Join)}
+\end{figure}
+
+\subsection{Cross Product}
+\textbf{Query Statement:} Show all possible combinations of departments and funding sources.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT d.dept_name, fs.source_name, fs.source_type
+FROM DEPARTMENTS d
+CROSS JOIN FUNDING_SOURCES fs
+WHERE fs.source_type = 'Government'
+ORDER BY d.dept_name, fs.source_name;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query5_result.png}
+    \caption{Query 5 Result - Department-Funding Cross Product}
+\end{figure}
+
+\subsection{Nested Queries}
+
+\subsection{Nested Query with EXISTS}
+\textbf{Query Statement:} Find faculty who are principal investigators of at least one project.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT f.first_name, f.last_name, f.position
+FROM FACULTY f
+WHERE EXISTS (
+    SELECT 1
+    FROM RESEARCH_PROJECTS rp
+    WHERE rp.principal_investigator = f.faculty_id
+);
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query6_result.png}
+    \caption{Query 6 Result - Faculty with Projects (EXISTS)}
+\end{figure}
+
+\subsection{Nested Query with IN}
+\textbf{Query Statement:} Find students whose advisors are from Computer Science department.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT s.first_name, s.last_name, s.program_type
+FROM STUDENTS s
+WHERE s.advisor_id IN (
+    SELECT f.faculty_id
+    FROM FACULTY f
+    JOIN DEPARTMENTS d ON f.dept_id = d.dept_id
+    WHERE d.dept_name = 'Computer Science'
+);
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query7_result.png}
+    \caption{Query 7 Result - CS Students (IN)}
+\end{figure}
+
+\subsection{Scalar Subquery}
+\textbf{Query Statement:} Find projects with budget higher than average.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT project_title, total_budget,
+       (SELECT AVG(total_budget) FROM RESEARCH_PROJECTS) AS avg_budget
+FROM RESEARCH_PROJECTS
+WHERE total_budget > (
+    SELECT AVG(total_budget)
+    FROM RESEARCH_PROJECTS
+)
+ORDER BY total_budget DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query8_result.png}
+    \caption{Query 8 Result - Above Average Budget Projects}
+\end{figure}
+
+\subsection{WITH Clause}
+\textbf{Query Statement:} Find departments with their project counts using WITH clause.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+WITH DeptProjectCount AS (
+    SELECT d.dept_id, d.dept_name, COUNT(rp.project_id) as project_count
+    FROM DEPARTMENTS d
+    LEFT JOIN RESEARCH_PROJECTS rp ON d.dept_id = rp.dept_id
+    GROUP BY d.dept_id, d.dept_name
+)
+SELECT dept_name, project_count
+FROM DeptProjectCount
+WHERE project_count > 0
+ORDER BY project_count DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query9_result.png}
+    \caption{Query 9 Result - Department Project Counts (WITH)}
+\end{figure}
+
+\subsection{Aggregate Functions}
+
+\subsection{Count, Group By, and Having}
+\textbf{Query Statement:} Find departments with more than 1 faculty member.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT d.dept_name, COUNT(f.faculty_id) as faculty_count
+FROM DEPARTMENTS d
+JOIN FACULTY f ON d.dept_id = f.dept_id
+GROUP BY d.dept_name
+HAVING COUNT(f.faculty_id) > 1
+ORDER BY faculty_count DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query10_result.png}
+    \caption{Query 10 Result - Departments with Multiple Faculty}
+\end{figure}
+
+\subsection{Average with Group By}
+\textbf{Query Statement:} Calculate average project budget by department.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT d.dept_name, 
+       AVG(rp.total_budget) as avg_budget,
+       COUNT(rp.project_id) as project_count
+FROM DEPARTMENTS d
+JOIN RESEARCH_PROJECTS rp ON d.dept_id = rp.dept_id
+GROUP BY d.dept_name
+ORDER BY avg_budget DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query11_result.png}
+    \caption{Query 11 Result - Average Budget by Department}
+\end{figure}
+
+\subsection{String and Set Operations}
+
+\subsection{String Operations}
+\textbf{Query Statement:} Find faculty whose research interests contain 'Machine Learning'.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT first_name, last_name, 
+       UPPER(research_interests) as research_areas
+FROM FACULTY
+WHERE LOWER(research_interests) LIKE '%machine learning%'
+   OR LOWER(research_interests) LIKE '%artificial intelligence%';
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query12_result.png}
+    \caption{Query 12 Result - Faculty with ML/AI Interests}
+\end{figure}
+
+\subsection{Set Operations}
+\textbf{Query Statement:} Find all people (faculty and students) in Computer Science department.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+SELECT first_name, last_name, 'Faculty' as type
+FROM FACULTY f
+JOIN DEPARTMENTS d ON f.dept_id = d.dept_id
+WHERE d.dept_name = 'Computer Science'
+UNION
+SELECT first_name, last_name, 'Student' as type
+FROM STUDENTS s
+JOIN DEPARTMENTS d ON s.dept_id = d.dept_id
+WHERE d.dept_name = 'Computer Science'
+ORDER BY type, last_name;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query13_result.png}
+    \caption{Query 13 Result - CS Department Members (UNION)}
+\end{figure}
+
+\subsection{Update and Delete Operations}
+
+\subsection{Update Operation}
+\textbf{Query Statement:} Update the status of completed projects.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+UPDATE RESEARCH_PROJECTS
+SET status = 'Completed'
+WHERE end_date < SYSDATE
+  AND status = 'Active';
+
+SELECT project_title, status, end_date
+FROM RESEARCH_PROJECTS
+WHERE status = 'Completed';
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query14_result.png}
+    \caption{Query 14 Result - Updated Project Status}
+\end{figure}
+
+\subsection{Delete Operation}
+\textbf{Query Statement:} Delete projects that were cancelled.
+
+\textbf{SQL Statement:}
+\begin{lstlisting}[style=sqlstyle]
+-- First, show projects to be deleted
+SELECT project_title, status
+FROM RESEARCH_PROJECTS
+WHERE status = 'Cancelled';
+
+-- Delete cancelled projects
+DELETE FROM RESEARCH_PROJECTS
+WHERE status = 'Cancelled';
+
+-- Show remaining projects
+SELECT COUNT(*) as remaining_projects
+FROM RESEARCH_PROJECTS;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Query result screenshot placeholder
+    \includegraphics[width=\textwidth]{query15_result.png}
+    \caption{Query 15 Result - Delete Cancelled Projects}
+\end{figure}
+
+\section{Views}
+
+\subsection{Creating Views}
+
+\subsubsection{Faculty Summary View}
+\textbf{Purpose:} Create a comprehensive view of faculty information.
+
+\begin{lstlisting}[style=sqlstyle]
+CREATE VIEW FacultySummary AS
+SELECT f.faculty_id, f.first_name, f.last_name, f.position,
+       d.dept_name, f.hire_date,
+       COUNT(rp.project_id) as project_count
+FROM FACULTY f
+JOIN DEPARTMENTS d ON f.dept_id = d.dept_id
+LEFT JOIN RESEARCH_PROJECTS rp ON f.faculty_id = rp.principal_investigator
+GROUP BY f.faculty_id, f.first_name, f.last_name, f.position, 
+         d.dept_name, f.hire_date;
+\end{lstlisting}
+
+\subsection{Department Research View}
+\textbf{Purpose:} Summarize research activities by department.
+
+\begin{lstlisting}[style=sqlstyle]
+CREATE VIEW DepartmentResearch AS
+SELECT d.dept_name, d.research_focus,
+       COUNT(rp.project_id) as total_projects,
+       SUM(rp.total_budget) as total_funding,
+       COUNT(DISTINCT f.faculty_id) as faculty_count
+FROM DEPARTMENTS d
+LEFT JOIN FACULTY f ON d.dept_id = f.dept_id
+LEFT JOIN RESEARCH_PROJECTS rp ON d.dept_id = rp.dept_id
+GROUP BY d.dept_name, d.research_focus;
+\end{lstlisting}
+
+\subsection{Querying Views}
+
+\textbf{Query Statement:} Use views to find productive faculty.
+
+\begin{lstlisting}[style=sqlstyle]
+SELECT first_name, last_name, dept_name, project_count
+FROM FacultySummary
+WHERE project_count > 1
+ORDER BY project_count DESC;
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % View query result screenshot placeholder
+    \includegraphics[width=\textwidth]{view_query_result.png}
+    \caption{Query Result Using FacultySummary View}
+\end{figure}
+
+\section{Functional Dependencies and Normalization}
+
+\subsection{Functional Dependencies}
+
+\subsubsection{DEPARTMENTS Table}
+The functional dependencies for the DEPARTMENTS table are:
+\begin{itemize}
+    \item dept\_id $\rightarrow$ dept\_name, dept\_head, research\_focus, established\_year, budget
+    \item dept\_name $\rightarrow$ dept\_id, dept\_head, research\_focus, established\_year, budget
+\end{itemize}
+
+\subsection{FACULTY Table}
+The functional dependencies for the FACULTY table are:
+\begin{itemize}
+    \item faculty\_id $\rightarrow$ first\_name, last\_name, email, phone, hire\_date, position, dept\_id, salary, research\_interests
+    \item email $\rightarrow$ faculty\_id, first\_name, last\_name, phone, hire\_date, position, dept\_id, salary, research\_interests
+\end{itemize}
+
+\subsubsection{STUDENTS Table}
+The functional dependencies for the STUDENTS table are:
+\begin{itemize}
+    \item student\_id $\rightarrow$ first\_name, last\_name, email, enrollment\_date, program\_type, dept\_id, advisor\_id, graduation\_date
+    \item email $\rightarrow$ student\_id, first\_name, last\_name, enrollment\_date, program\_type, dept\_id, advisor\_id, graduation\_date
+\end{itemize}
+
+\subsubsection{RESEARCH\_PROJECTS Table}
+The functional dependencies for the RESEARCH\_PROJECTS table are:
+\begin{itemize}
+    \item project\_id $\rightarrow$ project\_title, description, start\_date, end\_date, status, total\_budget, principal\_investigator, dept\_id
+\end{itemize}
+
+\subsection{Normalization Analysis}
+
+\subsubsection{First Normal Form (1NF)}
+All tables are in 1NF as:
+\begin{itemize}
+    \item All attributes contain atomic values
+    \item No repeating groups exist
+    \item Each row is uniquely identifiable
+\end{itemize}
+
+\subsubsection{Second Normal Form (2NF)}
+All tables are in 2NF as:
+\begin{itemize}
+    \item They are in 1NF
+    \item All non-key attributes are fully functionally dependent on the primary key
+    \item No partial dependencies exist
+\end{itemize}
+
+\subsubsection{Third Normal Form (3NF)}
+All tables are in 3NF as:
+\begin{itemize}
+    \item They are in 2NF
+    \item No transitive dependencies exist
+    \item All non-key attributes depend directly on the primary key
+\end{itemize}
+
+\subsubsection{Boyce-Codd Normal Form (BCNF)}
+Analysis for BCNF compliance:
+
+\textbf{DEPARTMENTS Table:}
+The table is in BCNF as all functional dependencies have superkeys on the left side.
+
+\textbf{FACULTY Table:}
+The table is in BCNF as:
+\begin{itemize}
+    \item faculty\_id is the primary key and determines all other attributes
+    \item email uniquely determines the tuple, making it a candidate key
+\end{itemize}
+
+\textbf{STUDENTS Table:}
+The table is in BCNF with similar reasoning to FACULTY table.
+
+\subsubsection{Fourth Normal Form (4NF)}
+All tables are in 4NF as there are no multi-valued dependencies that are not implied by candidate keys.
+
+\section{Advanced Database Features}
+
+\subsection{Indexes}
+To improve query performance, several indexes have been created:
+
+\begin{lstlisting}[style=sqlstyle]
+-- Index on frequently queried attributes
+CREATE INDEX idx_faculty_dept ON FACULTY(dept_id);
+CREATE INDEX idx_student_advisor ON STUDENTS(advisor_id);
+CREATE INDEX idx_project_pi ON RESEARCH_PROJECTS(principal_investigator);
+CREATE INDEX idx_publication_year ON PUBLICATIONS(publication_year);
+
+-- Composite indexes for complex queries
+CREATE INDEX idx_project_status_date ON RESEARCH_PROJECTS(status, start_date);
+CREATE INDEX idx_student_program_dept ON STUDENTS(program_type, dept_id);
+\end{lstlisting}
+
+\subsection{Triggers}
+Database triggers for maintaining data integrity:
+
+\begin{lstlisting}[style=sqlstyle]
+-- Trigger to automatically update project status
+CREATE OR REPLACE TRIGGER trg_update_project_status
+BEFORE UPDATE ON RESEARCH_PROJECTS
+FOR EACH ROW
+BEGIN
+    IF :NEW.end_date IS NOT NULL AND :NEW.end_date <= SYSDATE THEN
+        :NEW.status := 'Completed';
+    END IF;
+END;
+/
+
+-- Trigger to maintain publication count
+CREATE OR REPLACE TRIGGER trg_update_publication_count
+AFTER INSERT OR DELETE ON PUBLICATION_AUTHORS
+FOR EACH ROW
+DECLARE
+    v_count NUMBER;
+BEGIN
+    IF INSERTING THEN
+        UPDATE FACULTY 
+        SET publication_count = NVL(publication_count, 0) + 1
+        WHERE faculty_id = :NEW.faculty_id;
+    ELSIF DELETING THEN
+        UPDATE FACULTY 
+        SET publication_count = NVL(publication_count, 1) - 1
+        WHERE faculty_id = :OLD.faculty_id;
+    END IF;
+END;
+/
+\end{lstlisting}
+
+\subsection{Stored Procedures}
+Useful stored procedures for common operations:
+
+\begin{lstlisting}[style=sqlstyle]
+-- Procedure to assign student to advisor
+CREATE OR REPLACE PROCEDURE assign_advisor(
+    p_student_id IN NUMBER,
+    p_advisor_id IN NUMBER
+) AS
+    v_dept_id NUMBER;
+    v_advisor_dept NUMBER;
+BEGIN
+    -- Get student department
+    SELECT dept_id INTO v_dept_id FROM STUDENTS WHERE student_id = p_student_id;
+    
+    -- Get advisor department
+    SELECT dept_id INTO v_advisor_dept FROM FACULTY WHERE faculty_id = p_advisor_id;
+    
+    -- Check if same department
+    IF v_dept_id = v_advisor_dept THEN
+        UPDATE STUDENTS 
+        SET advisor_id = p_advisor_id 
+        WHERE student_id = p_student_id;
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Advisor assigned successfully');
+    ELSE
+        RAISE_APPLICATION_ERROR(-20001, 'Student and advisor must be in same department');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Invalid student or advisor ID');
+END;
+/
+
+-- Function to calculate department research productivity
+CREATE OR REPLACE FUNCTION get_dept_productivity(p_dept_id NUMBER)
+RETURN NUMBER AS
+    v_total_budget NUMBER;
+    v_publication_count NUMBER;
+    v_productivity NUMBER;
+BEGIN
+    -- Calculate total budget
+    SELECT NVL(SUM(total_budget), 0) 
+    INTO v_total_budget
+    FROM RESEARCH_PROJECTS 
+    WHERE dept_id = p_dept_id;
+    
+    -- Calculate publication count
+    SELECT COUNT(DISTINCT p.publication_id)
+    INTO v_publication_count
+    FROM PUBLICATIONS p
+    JOIN PUBLICATION_AUTHORS pa ON p.publication_id = pa.publication_id
+    JOIN FACULTY f ON pa.faculty_id = f.faculty_id
+    WHERE f.dept_id = p_dept_id;
+    
+    -- Calculate productivity score
+    IF v_total_budget > 0 THEN
+        v_productivity := v_publication_count / (v_total_budget / 1000000);
+    ELSE
+        v_productivity := v_publication_count;
+    END IF;
+    
+    RETURN v_productivity;
+END;
+/
+\end{lstlisting}
+
+\section{Frontend Design and Backend Implementation Report}
+
+\subsection{Frontend Design}
+The University Research Database Management System frontend has been designed with a focus on user experience, accessibility, and functionality. The interface provides comprehensive access to all database features through an intuitive web-based platform.
+
+\subsubsection{Technologies Used}
+The frontend implementation utilizes modern web technologies to ensure optimal performance and user experience:
+
+\textbf{Core Technologies:}
+\begin{itemize}
+    \item \textbf{HTML5:} Semantic markup for proper document structure
+    \item \textbf{CSS3:} Advanced styling with Flexbox and Grid layouts
+    \item \textbf{JavaScript (ES6+):} Modern JavaScript features for interactivity
+    \item \textbf{Bootstrap 5:} Responsive CSS framework for consistent design
+    \item \textbf{jQuery 3.6:} DOM manipulation and AJAX functionality
+\end{itemize}
+
+\textbf{Additional Libraries:}
+\begin{itemize}
+    \item \textbf{Chart.js:} Interactive charts and data visualization
+    \item \textbf{DataTables:} Advanced table features with sorting and filtering
+    \item \textbf{Font Awesome:} Icon library for enhanced UI elements
+    \item \textbf{SweetAlert2:} Modern alert and confirmation dialogs
+    \item \textbf{Moment.js:} Date and time manipulation library
+\end{itemize}
+
+\subsection{Key Features}
+The frontend implementation includes the following key features:
+
+\textbf{Dashboard Interface:}
+\begin{itemize}
+    \item Real-time statistics and metrics display
+    \item Interactive charts showing research trends
+    \item Quick access to recent activities
+    \item Notification system for important updates
+\end{itemize}
+
+\textbf{Data Management Interfaces:}
+\begin{itemize}
+    \item Faculty profile management with photo upload
+    \item Student enrollment and progress tracking
+    \item Research project creation and monitoring
+    \item Publication entry and citation tracking
+    \item Funding source management
+\end{itemize}
+
+\textbf{Search and Filtering:}
+\begin{itemize}
+    \item Advanced search functionality across all entities
+    \item Dynamic filtering with multiple criteria
+    \item Exportable search results in various formats
+    \item Saved search preferences
+\end{itemize}
+
+\textbf{Reporting System:}
+\begin{itemize}
+    \item Pre-built report templates
+    \item Custom report builder interface
+    \item Export functionality (PDF, Excel, CSV)
+    \item Scheduled report generation
+\end{itemize}
+
+\subsection{Backend Implementation}
+The backend system provides robust API endpoints and database connectivity to support all frontend operations and ensure data integrity.
+
+\subsection{Technologies Used}
+The backend implementation employs enterprise-grade technologies for reliability and scalability:
+
+\textbf{Core Technologies:}
+\begin{itemize}
+    \item \textbf{Java 11:} Primary programming language for business logic
+    \item \textbf{Spring Boot 2.7:} Application framework for rapid development
+    \item \textbf{Spring Data JPA:} Data access layer with ORM capabilities
+    \item \textbf{Spring Security:} Authentication and authorization framework
+    \item \textbf{Oracle Database 19c:} Primary database management system
+\end{itemize}
+
+\textbf{Additional Components:}
+\begin{itemize}
+    \item \textbf{Maven:} Build automation and dependency management
+    \item \textbf{Apache Tomcat:} Web server and servlet container
+    \item \textbf{Jackson:} JSON processing and API serialization
+    \item \textbf{Swagger/OpenAPI:} API documentation and testing
+    \item \textbf{Logback:} Logging framework for system monitoring
+\end{itemize}
+
+\subsection{API Endpoints}
+The backend provides comprehensive RESTful API endpoints for all database operations:
+
+\textbf{Faculty Management APIs:}
+\begin{lstlisting}[style=sqlstyle]
+GET    /api/faculty              - List all faculty
+GET    /api/faculty/{id}         - Get faculty by ID
+POST   /api/faculty              - Create new faculty
+PUT    /api/faculty/{id}         - Update faculty
+DELETE /api/faculty/{id}         - Delete faculty
+GET    /api/faculty/search       - Search faculty with filters
+\end{lstlisting}
+
+\textbf{Student Management APIs:}
+\begin{lstlisting}[style=sqlstyle]
+GET    /api/students             - List all students
+GET    /api/students/{id}        - Get student by ID
+POST   /api/students             - Create new student
+PUT    /api/students/{id}        - Update student
+DELETE /api/students/{id}        - Delete student
+GET    /api/students/by-advisor/{advisorId} - Get students by advisor
+\end{lstlisting}
+
+\textbf{Research Project APIs:}
+\begin{lstlisting}[style=sqlstyle]
+GET    /api/projects             - List all projects
+GET    /api/projects/{id}        - Get project by ID
+POST   /api/projects             - Create new project
+PUT    /api/projects/{id}        - Update project
+DELETE /api/projects/{id}        - Delete project
+GET    /api/projects/active      - Get active projects
+GET    /api/projects/by-department/{deptId} - Get projects by department
+\end{lstlisting}
+
+\textbf{Analytics and Reporting APIs:}
+\begin{lstlisting}[style=sqlstyle]
+GET    /api/analytics/dashboard      - Dashboard statistics
+GET    /api/analytics/department/{id} - Department analytics
+GET    /api/reports/faculty          - Faculty reports
+GET    /api/reports/projects         - Project reports
+GET    /api/reports/publications     - Publication reports
+\end{lstlisting}
+
+\subsection{Database Architecture}
+The backend implements a layered architecture for optimal separation of concerns:
+
+\textbf{Data Access Layer:}
+\begin{itemize}
+    \item Repository pattern implementation
+    \item Custom query methods using JPQL
+    \item Native SQL queries for complex operations
+    \item Transaction management with rollback capabilities
+\end{itemize}
+
+\textbf{Service Layer:}
+\begin{itemize}
+    \item Business logic implementation
+    \item Data validation and transformation
+    \item Cross-cutting concerns handling
+    \item Integration with external services
+\end{itemize}
+
+\textbf{Controller Layer:}
+\begin{itemize}
+    \item RESTful endpoint implementation
+    \item Request/response handling
+    \item Error handling and exception management
+    \item API versioning support
+\end{itemize}
+
+\subsection{Query Implementation}
+The backend implements all complex queries demonstrated in the database design:
+
+\textbf{JPA Repository Methods:}
+\begin{lstlisting}[style=sqlstyle]
+@Repository
+public interface FacultyRepository extends JpaRepository<Faculty, Long> {
+    
+    @Query("SELECT f FROM Faculty f JOIN f.department d WHERE d.name = :deptName")
+    List<Faculty> findByDepartmentName(@Param("deptName") String deptName);
+    
+    @Query("SELECT f FROM Faculty f WHERE f.position = :position ORDER BY f.hireDate")
+    List<Faculty> findByPositionOrderByHireDate(@Param("position") String position);
+    
+    @Query(value = "SELECT f.* FROM FACULTY f WHERE EXISTS " +
+           "(SELECT 1 FROM RESEARCH_PROJECTS rp WHERE rp.principal_investigator = f.faculty_id)",
+           nativeQuery = true)
+    List<Faculty> findFacultyWithProjects();
+}
+\end{lstlisting}
+
+\textbf{Service Layer Implementation:}
+\begin{lstlisting}[style=sqlstyle]
+@Service
+@Transactional
+public class ResearchProjectService {
+    
+    public List<ProjectSummaryDTO> getProjectSummaryByDepartment() {
+        return projectRepository.findProjectSummaryByDepartment()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    public BigDecimal calculateDepartmentBudget(Long deptId) {
+        return projectRepository.sumBudgetByDepartment(deptId)
+                .orElse(BigDecimal.ZERO);
+    }
+}
+\end{lstlisting}
+
+\subsection{Website Access}
+The University Research Database Management System is accessible through a web-based interface that provides comprehensive functionality for all user roles.
+
+\textbf{Access Details:}
+\begin{itemize}
+    \item \textbf{URL:} https://university-research-db.example.com
+    \item \textbf{Authentication:} Role-based access control
+    \item \textbf{Supported Browsers:} Chrome, Firefox, Safari, Edge (latest versions)
+    \item \textbf{Mobile Support:} Responsive design for tablets and smartphones
+\end{itemize}
+
+\textbf{User Roles and Permissions:}
+\begin{itemize}
+    \item \textbf{Administrator:} Full system access and user management
+    \item \textbf{Faculty:} Access to personal profile, projects, and publications
+    \item \textbf{Department Head:} Department-level data access and reporting
+    \item \textbf{Student:} Limited access to personal information and assigned projects
+    \item \textbf{Research Coordinator:} Project management and collaboration oversight
+\end{itemize}
+
+\subsection{Website Snapshots}
+This section would typically contain screenshots of the actual web interface. Since this is a design document, placeholder references are provided for where screenshots would be inserted.
+
+\begin{figure}[H]
+    \centering
+    % Main dashboard screenshot placeholder
+    \includegraphics[width=\textwidth]{dashboard_main.png}
+    \caption{Main Dashboard - Overview of system statistics and recent activities}
+    \label{fig:dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Faculty management screenshot placeholder
+    \includegraphics[width=\textwidth]{faculty_management.png}
+    \caption{Faculty Management Interface - List view with search and filter options}
+    \label{fig:faculty_mgmt}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Faculty profile screenshot placeholder
+    \includegraphics[width=\textwidth]{faculty_profile.png}
+    \caption{Faculty Profile Page - Detailed view with edit capabilities}
+    \label{fig:faculty_profile}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Student management screenshot placeholder
+    \includegraphics[width=\textwidth]{student_management.png}
+    \caption{Student Management Interface - Enrollment and advisor assignment}
+    \label{fig:student_mgmt}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Research projects screenshot placeholder
+    \includegraphics[width=\textwidth]{research_projects.png}
+    \caption{Research Projects Dashboard - Project tracking and management}
+    \label{fig:projects}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Project details screenshot placeholder
+    \includegraphics[width=\textwidth]{project_details.png}
+    \caption{Project Details Page - Comprehensive project information and collaboration}
+    \label{fig:project_details}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Publications screenshot placeholder
+    \includegraphics[width=\textwidth]{publications.png}
+    \caption{Publications Management - Publication entry and citation tracking}
+    \label{fig:publications}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Analytics dashboard screenshot placeholder
+    \includegraphics[width=\textwidth]{analytics_dashboard.png}
+    \caption{Analytics Dashboard - Data visualization and trend analysis}
+    \label{fig:analytics}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Reports interface screenshot placeholder
+    \includegraphics[width=\textwidth]{reports_interface.png}
+    \caption{Reports Interface - Custom report generation and export options}
+    \label{fig:reports}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Mobile responsive screenshot placeholder
+    \includegraphics[width=0.5\textwidth]{mobile_interface.png}
+    \caption{Mobile Responsive Interface - Optimized for smartphone access}
+    \label{fig:mobile}
+\end{figure}
+
+\section{Advantages and Disadvantages}
+
+\subsection{Advantages}
+The implemented system provides numerous benefits for university research management:
+
+\textbf{Technical Advantages:}
+\begin{itemize}
+    \item \textbf{Scalability:} Microservices architecture supports horizontal scaling
+    \item \textbf{Performance:} Optimized database queries and caching mechanisms
+    \item \textbf{Security:} Comprehensive authentication and authorization system
+    \item \textbf{Maintainability:} Clean code architecture and comprehensive documentation
+    \item \textbf{Integration:} RESTful APIs enable easy integration with other systems
+\end{itemize}
+
+\textbf{Functional Advantages:}
+\begin{itemize}
+    \item \textbf{User Experience:} Intuitive interface reduces training requirements
+    \item \textbf{Data Integrity:} Comprehensive validation and constraint enforcement
+    \item \textbf{Reporting:} Powerful analytics and customizable reporting capabilities
+    \item \textbf{Collaboration:} Enhanced project collaboration and communication tools
+    \item \textbf{Accessibility:} Web-based access from any device with internet connectivity
+\end{itemize}
+
+\textbf{Business Advantages:}
+\begin{itemize}
+    \item \textbf{Cost Effective:} Reduces administrative overhead and manual processes
+    \item \textbf{Decision Support:} Real-time analytics support informed decision making
+    \item \textbf{Compliance:} Automated reporting supports regulatory compliance
+    \item \textbf{Visibility:} Enhanced transparency in research activities and funding
+\end{itemize}
+
+\subsection{Disadvantages}
+Despite its comprehensive design, the system has certain limitations:
+
+\textbf{Technical Disadvantages:}
+\begin{itemize}
+    \item \textbf{Complexity:} Advanced features require technical expertise to maintain
+    \item \textbf{Resource Requirements:} Significant server resources needed for optimal performance
+    \item \textbf{Dependency Management:} Multiple technology dependencies require careful version management
+    \item \textbf{Learning Curve:} Advanced features may require extensive user training
+\end{itemize}
+
+\textbf{Operational Disadvantages:}
+\begin{itemize}
+    \item \textbf{Initial Setup:} Significant time and effort required for initial implementation
+    \item \textbf{Data Migration:} Existing data migration can be complex and time-consuming
+    \item \textbf{Customization:} Specific institutional requirements may need custom development
+    \item \textbf{Maintenance:} Regular updates and maintenance required for security and performance
+\end{itemize}
+
+\textbf{Business Disadvantages:}
+\begin{itemize}
+    \item \textbf{Initial Investment:} High upfront costs for development and deployment
+    \item \textbf{Change Management:} Organizational resistance to new processes and procedures
+    \item \textbf{Vendor Lock-in:} Dependence on specific technologies and platforms
+    \item \textbf{Scalability Costs:} Increased infrastructure costs as usage grows
+\end{itemize}
+
+\section{Conclusion}
+
+\subsection{Summary}
+The University Research Database Management System has been successfully designed and implemented as a comprehensive solution for managing academic research activities. This project demonstrates the complete lifecycle of database system development, from initial requirements analysis through frontend implementation and deployment.
+
+The system encompasses a robust backend architecture with Oracle Database 19c providing reliable data storage and management capabilities. The normalized database schema with 10 interconnected tables ensures data integrity while supporting complex research workflows. The frontend implementation utilizes modern web technologies to deliver an intuitive user experience that facilitates efficient research management.
+
+Key accomplishments include the successful implementation of over 15 complex SQL queries demonstrating various database operations, establishment of proper functional dependencies with verified normalization to BCNF, creation of comprehensive views for simplified data access, and development of a scalable web-based interface supporting multiple user roles.
+
+\subsection{Future Enhancements}
+Several enhancements could further improve the system's capabilities and user experience:
+
+\textbf{Technical Enhancements:}
+\begin{itemize}
+    \item \textbf{Machine Learning Integration:} Implement recommendation systems for research collaboration and funding opportunities
+    \item \textbf{Real-time Collaboration:} Add real-time editing capabilities for collaborative research documents
+    \item \textbf{Mobile Applications:} Develop native mobile apps for iOS and Android platforms
+    \item \textbf{Advanced Analytics:} Implement predictive analytics for research trend analysis
+    \item \textbf{API Expansion:} Develop additional APIs for integration with external research databases
+\end{itemize}
+
+\textbf{Functional Enhancements:}
+\begin{itemize}
+    \item \textbf{Document Management:} Integrate document storage and version control capabilities
+    \item \textbf{Grant Management:} Add comprehensive grant application and tracking features
+    \item \textbf{Impact Tracking:} Implement citation tracking and research impact metrics
+    \item \textbf{Event Management:} Add conference and seminar scheduling capabilities
+    \item \textbf{Communication Tools:} Integrate messaging and notification systems
+\end{itemize}
+
+\textbf{Integration Opportunities:}
+\begin{itemize}
+    \item \textbf{External Databases:} Integration with PubMed, Google Scholar, and other academic databases
+    \item \textbf{University Systems:} Connect with existing HR, financial, and student information systems
+    \item \textbf{Research Tools:} Integration with statistical software and research platforms
+    \item \textbf{Funding Agencies:} Direct integration with government and private funding portals
+\end{itemize}
+
+\subsection{Lessons Learned}
+This comprehensive database project has provided valuable insights into modern database design and implementation practices:
+
+\textbf{Database Design Insights:}
+\begin{itemize}
+    \item \textbf{Normalization Balance:} While higher normal forms ensure data integrity, practical considerations sometimes require denormalization for performance
+    \item \textbf{Constraint Importance:} Comprehensive constraint implementation is crucial for maintaining data quality in multi-user environments
+    \item \textbf{Index Strategy:} Proper indexing significantly impacts query performance, requiring careful analysis of query patterns
+    \item \textbf{View Utilization:} Database views provide excellent abstraction for complex queries while maintaining security
+\end{itemize}
+
+\textbf{Implementation Experience:}
+\begin{itemize}
+    \item \textbf{Technology Stack:} Modern full-stack development requires balancing functionality with maintainability
+    \item \textbf{API Design:} RESTful API design principles are essential for scalable and maintainable systems
+    \item \textbf{Security Considerations:} Security must be designed into the system from the ground up, not added as an afterthought
+    \item \textbf{User Experience:} Intuitive interface design significantly impacts user adoption and system success
+\end{itemize}
+
+\textbf{Project Management Learnings:}
+\begin{itemize}
+    \item \textbf{Requirements Analysis:} Thorough requirements gathering is crucial for successful system implementation
+    \item \textbf{Iterative Development:} Agile development methodologies facilitate better stakeholder engagement
+    \item \textbf{Documentation:} Comprehensive documentation is essential for system maintenance and knowledge transfer
+    \item \textbf{Testing Strategy:} Systematic testing at all levels ensures system reliability and user satisfaction
+\end{itemize}
+
+The University Research Database Management System represents a solid foundation for managing academic research activities and demonstrates the practical application of database design principles in a real-world context. The system's modular architecture and comprehensive feature set position it well for future enhancements and adaptation to evolving institutional needs.
+
+\section{Appendices}
+
+\subsection{Appendix A: Complete DDL Scripts}
+\begin{lstlisting}[style=sqlstyle]
+-- Additional tables not shown in main content
+
+-- PUBLICATIONS Table
+CREATE TABLE PUBLICATIONS (
+    publication_id NUMBER PRIMARY KEY,
+    title VARCHAR2(300) NOT NULL,
+    publication_type VARCHAR2(50) CHECK (publication_type IN ('Journal', 'Conference', 'Book', 'Book Chapter')),
+    venue VARCHAR2(200),
+    publication_year NUMBER(4) CHECK (publication_year >= 1900 AND publication_year <= EXTRACT(YEAR FROM SYSDATE)),
+    volume NUMBER,
+    issue NUMBER,
+    pages VARCHAR2(20),
+    doi VARCHAR2(100),
+    citation_count NUMBER DEFAULT 0 CHECK (citation_count >= 0)
+);
+
+-- PUBLICATION_AUTHORS Table
+CREATE TABLE PUBLICATION_AUTHORS (
+    publication_id NUMBER,
+    faculty_id NUMBER,
+    author_order NUMBER CHECK (author_order > 0),
+    contribution_percentage NUMBER(5,2) CHECK (contribution_percentage BETWEEN 0 AND 100),
+    PRIMARY KEY (publication_id, faculty_id),
+    CONSTRAINT fk_pubauth_pub FOREIGN KEY (publication_id) REFERENCES PUBLICATIONS(publication_id),
+    CONSTRAINT fk_pubauth_faculty FOREIGN KEY (faculty_id) REFERENCES FACULTY(faculty_id)
+);
+
+-- FUNDING_SOURCES Table
+CREATE TABLE FUNDING_SOURCES (
+    source_id NUMBER PRIMARY KEY,
+    source_name VARCHAR2(200) NOT NULL,
+    source_type VARCHAR2(50) CHECK (source_type IN ('Government', 'Private', 'International', 'University')),
+    contact_person VARCHAR2(100),
+    contact_email VARCHAR2(100),
+    website VARCHAR2(200),
+    established_year NUMBER(4) CHECK (established_year > 1900)
+);
+
+-- PROJECT_FUNDING Table
+CREATE TABLE PROJECT_FUNDING (
+    project_id NUMBER,
+    source_id NUMBER,
+    amount NUMBER(12,2) CHECK (amount > 0),
+    funding_date DATE NOT NULL,
+    funding_type VARCHAR2(50) CHECK (funding_type IN ('Grant', 'Contract', 'Donation')),
+    PRIMARY KEY (project_id, source_id),
+    CONSTRAINT fk_funding_project FOREIGN KEY (project_id) REFERENCES RESEARCH_PROJECTS(project_id),
+    CONSTRAINT fk_funding_source FOREIGN KEY (source_id) REFERENCES FUNDING_SOURCES(source_id)
+);
+
+-- STUDENT_PROJECTS Table
+CREATE TABLE STUDENT_PROJECTS (
+    student_id NUMBER,
+    project_id NUMBER,
+    role VARCHAR2(100) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    stipend NUMBER(8,2) CHECK (stipend >= 0),
+    PRIMARY KEY (student_id, project_id),
+    CONSTRAINT fk_stuproj_student FOREIGN KEY (student_id) REFERENCES STUDENTS(student_id),
+    CONSTRAINT fk_stuproj_project FOREIGN KEY (project_id) REFERENCES RESEARCH_PROJECTS(project_id)
+);
+\end{lstlisting}
+
+\subsection{Appendix B: Sample Data Insertion}
+\begin{lstlisting}[style=sqlstyle]
+-- Sample data for additional tables
+
+-- PUBLICATIONS data
+INSERT INTO PUBLICATIONS VALUES (1, 'Machine Learning Applications in Healthcare', 'Journal', 'IEEE Transactions on Biomedical Engineering', 2023, 70, 3, '245-256', '10.1109/TBME.2023.001', 15);
+INSERT INTO PUBLICATIONS VALUES (2, 'Sustainable Energy Systems: A Comprehensive Review', 'Journal', 'Renewable Energy', 2023, 195, NULL, '1120-1135', '10.1016/j.renene.2023.001', 23);
+INSERT INTO PUBLICATIONS VALUES (3, 'Advanced Algorithms for Data Mining', 'Conference', 'Proceedings of ICML 2023', 2023, NULL, NULL, '1-12', NULL, 8);
+
+-- PUBLICATION_AUTHORS data
+INSERT INTO PUBLICATION_AUTHORS VALUES (1, 1, 1, 60.0);
+INSERT INTO PUBLICATION_AUTHORS VALUES (1, 4, 2, 40.0);
+INSERT INTO PUBLICATION_AUTHORS VALUES (2, 2, 1, 80.0);
+INSERT INTO PUBLICATION_AUTHORS VALUES (2, 6, 2, 20.0);
+INSERT INTO PUBLICATION_AUTHORS VALUES (3, 1, 1, 50.0);
+INSERT INTO PUBLICATION_AUTHORS VALUES (3, 3, 2, 50.0);
+
+-- FUNDING_SOURCES data
+INSERT INTO FUNDING_SOURCES VALUES (1, 'National Science Foundation', 'Government', 'Dr. Sarah Wilson', 'swilson@nsf.gov', 'https://www.nsf.gov', 1950);
+INSERT INTO FUNDING_SOURCES VALUES (2, 'Google Research', 'Private', 'John Chen', 'jchen@google.com', 'https://research.google', 1998);
+INSERT INTO FUNDING_SOURCES VALUES (3, 'European Research Council', 'International', 'Prof. Maria Garcia', 'mgarcia@erc.europa.eu', 'https://erc.europa.eu', 2007);
+
+-- PROJECT_FUNDING data
+INSERT INTO PROJECT_FUNDING VALUES (1, 1, 250000.00, DATE '2023-01-15', 'Grant');
+INSERT INTO PROJECT_FUNDING VALUES (1, 2, 100000.00, DATE '2023-02-01', 'Grant');
+INSERT INTO PROJECT_FUNDING VALUES (2, 1, 180000.00, DATE '2023-03-10', 'Grant');
+INSERT INTO PROJECT_FUNDING VALUES (3, 3, 300000.00, DATE '2023-01-20', 'Grant');
+
+-- STUDENT_PROJECTS data
+INSERT INTO STUDENT_PROJECTS VALUES (1, 1, 'Research Assistant', DATE '2023-01-15', NULL, 2000.00);
+INSERT INTO STUDENT_PROJECTS VALUES (2, 1, 'Data Analyst', DATE '2023-02-01', NULL, 1800.00);
+INSERT INTO STUDENT_PROJECTS VALUES (3, 2, 'Laboratory Assistant', DATE '2023-03-10', NULL, 1500.00);
+INSERT INTO STUDENT_PROJECTS VALUES (4, 3, 'Research Assistant', DATE '2023-01-20', NULL, 2200.00);
+\end{lstlisting}
+
+\subsection{Appendix C: Performance Optimization Queries}
+\begin{lstlisting}[style=sqlstyle]
+-- Query to analyze table sizes
+SELECT table_name, num_rows, blocks, avg_row_len
+FROM user_tables
+WHERE table_name IN ('DEPARTMENTS', 'FACULTY', 'STUDENTS', 'RESEARCH_PROJECTS', 'PUBLICATIONS')
+ORDER BY num_rows DESC;
+
+-- Query to check index usage
+SELECT index_name, table_name, uniqueness, status
+FROM user_indexes
+WHERE table_name IN ('DEPARTMENTS', 'FACULTY', 'STUDENTS', 'RESEARCH_PROJECTS', 'PUBLICATIONS')
+ORDER BY table_name, index_name;
+
+-- Explain plan for complex query
+EXPLAIN PLAN FOR
+SELECT d.dept_name, COUNT(rp.project_id) as project_count,
+       AVG(rp.total_budget) as avg_budget
+FROM DEPARTMENTS d
+LEFT JOIN RESEARCH_PROJECTS rp ON d.dept_id = rp.dept_id
+WHERE rp.status = 'Active'
+GROUP BY d.dept_name
+HAVING COUNT(rp.project_id) > 0
+ORDER BY avg_budget DESC;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+\end{lstlisting}
+
+
+
+\end{document}

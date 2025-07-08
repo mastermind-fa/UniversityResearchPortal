@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSEDU Portal</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-xl font-bold">CSEDU Portal</a>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-indigo-200">Dashboard</a>
+                    <a href="pages/departments.html" class="hover:text-indigo-200">Departments</a>
+                    <a href="pages/faculty.html" class="hover:text-indigo-200">Faculty</a>
+                    <a href="pages/students.html" class="hover:text-indigo-200">Students</a>
+                    <a href="pages/projects.html" class="hover:text-indigo-200">Projects</a>
+                    <a href="pages/publications.html" class="hover:text-indigo-200">Publications</a>
+                    <a href="pages/funding.html" class="hover:text-indigo-200">Funding</a>
+                    <a href="pages/collaborators.html" class="hover:text-indigo-200">Collaborators</a>
+                    <a href="pages/student-research.html" class="hover:text-indigo-200">Student Research</a>
+                    <a href="pages/reports.html" class="hover:text-indigo-200">Reports</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="index.html" class="block py-2 hover:text-indigo-200">Dashboard</a>
+                <a href="pages/departments.html" class="block py-2 hover:text-indigo-200">Departments</a>
+                <a href="pages/faculty.html" class="block py-2 hover:text-indigo-200">Faculty</a>
+                <a href="pages/students.html" class="block py-2 hover:text-indigo-200">Students</a>
+                <a href="pages/projects.html" class="block py-2 hover:text-indigo-200">Projects</a>
+                <a href="pages/publications.html" class="block py-2 hover:text-indigo-200">Publications</a>
+                <a href="pages/funding.html" class="block py-2 hover:text-indigo-200">Funding</a>
+                <a href="pages/collaborators.html" class="block py-2 hover:text-indigo-200">Collaborators</a>
+                <a href="pages/student-research.html" class="block py-2 hover:text-indigo-200">Student Research</a>
+                <a href="pages/reports.html" class="block py-2 hover:text-indigo-200">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-6 text-indigo-800">University Research Dashboard</h1>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            <p class="mt-2 text-indigo-600">Loading dashboard data...</p>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div id="dashboard-stats" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Stats cards will be populated by JS -->
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Students by Program</h2>
+                <div id="students-program-chart" class="h-64"></div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Active Projects Status</h2>
+                <div id="projects-budget-chart" class="h-64"></div>
+            </div>
+        </div>
+
+        <!-- Recent Projects -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">Active Research Projects</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-indigo-50">
+                        <tr>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Title</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Department</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Budget</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Funding Source</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="active-projects">
+                        <!-- Projects will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Quick Access Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <!-- Project Collaborators Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">Project Collaborators</h2>
+                    <span class="text-indigo-600"><i class="fas fa-users"></i></span>
+                </div>
+                <p class="text-gray-600 mb-4">Manage external collaborations and partnerships across research projects.</p>
+                <div class="mt-4">
+                    <a href="pages/collaborators.html" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                        Manage Collaborators <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Student Research Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">Student Research</h2>
+                    <span class="text-indigo-600"><i class="fas fa-microscope"></i></span>
+                </div>
+                <p class="text-gray-600 mb-4">Track and manage student thesis, dissertations, and research activities.</p>
+                <div class="mt-4">
+                    <a href="pages/student-research.html" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                        View Student Research <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department with most faculty -->
+        <div id="top-department-card" class="bg-white p-6 rounded-lg shadow-md mb-10">
+            <h2 class="text-xl font-semibold mb-4">Department Spotlight</h2>
+            <div id="top-department-content">
+                <!-- Content will be populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-indigo-900 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p>&copy; 2023 CSEDU Portal</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ApexCharts for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Custom JS -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/navigation.js"></script>
+</body>
+</html>

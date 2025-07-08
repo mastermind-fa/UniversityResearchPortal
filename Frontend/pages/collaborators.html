@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Collaborators | CSEDU Portal</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-xl font-bold">CSEDU Portal</a>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="../index.html" class="hover:text-indigo-200">Dashboard</a>
+                    <a href="departments.html" class="hover:text-indigo-200">Departments</a>
+                    <a href="faculty.html" class="hover:text-indigo-200">Faculty</a>
+                    <a href="students.html" class="hover:text-indigo-200">Students</a>
+                    <a href="projects.html" class="hover:text-indigo-200">Projects</a>
+                    <a href="publications.html" class="hover:text-indigo-200">Publications</a>
+                    <a href="funding.html" class="hover:text-indigo-200">Funding</a>
+                    <a href="collaborators.html" class="hover:text-indigo-200 font-semibold">Collaborators</a>
+                    <a href="student-research.html" class="hover:text-indigo-200">Student Research</a>
+                    <a href="reports.html" class="hover:text-indigo-200">Reports</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="../index.html" class="block py-2 hover:text-indigo-200">Dashboard</a>
+                <a href="departments.html" class="block py-2 hover:text-indigo-200">Departments</a>
+                <a href="faculty.html" class="block py-2 hover:text-indigo-200">Faculty</a>
+                <a href="students.html" class="block py-2 hover:text-indigo-200">Students</a>
+                <a href="projects.html" class="block py-2 hover:text-indigo-200">Projects</a>
+                <a href="publications.html" class="block py-2 hover:text-indigo-200">Publications</a>
+                <a href="funding.html" class="block py-2 hover:text-indigo-200">Funding</a>
+                <a href="collaborators.html" class="block py-2 hover:text-indigo-200 font-semibold">Collaborators</a>
+                <a href="student-research.html" class="block py-2 hover:text-indigo-200">Student Research</a>
+                <a href="reports.html" class="block py-2 hover:text-indigo-200">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-indigo-800">Project Collaborators</h1>
+            <button id="add-collaborator-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg flex items-center">
+                <i class="fas fa-plus mr-2"></i> Add Collaborator
+            </button>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-grow">
+                    <input type="text" id="collaborator-search" placeholder="Search by name or institution..." 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="md:w-1/4">
+                    <select id="project-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        <option value="">All Projects</option>
+                        <!-- Projects will be populated by JS -->
+                    </select>
+                </div>
+                <div class="md:w-1/5">
+                    <select id="type-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        <option value="">All Types</option>
+                        <option value="External Faculty">External Faculty</option>
+                        <option value="Industry Partner">Industry Partner</option>
+                        <option value="Research Institute">Research Institute</option>
+                        <option value="Government">Government</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="search-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            <p class="mt-2 text-indigo-600">Loading collaborators...</p>
+        </div>
+
+        <!-- Collaborators Table -->
+        <div id="collaborators-container" class="bg-white rounded-lg shadow-md overflow-hidden hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institution</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projects</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="collaborators-table" class="bg-white divide-y divide-gray-200">
+                    <!-- Collaborators will be populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Collaborators Message -->
+        <div id="no-collaborators" class="hidden text-center py-10">
+            <i class="fas fa-users text-indigo-300 text-5xl mb-4"></i>
+            <p class="text-xl text-gray-600">No collaborators found</p>
+            <p class="text-gray-500">Try adjusting your search filters</p>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="hidden flex justify-between items-center mt-8">
+            <div class="text-gray-600">
+                Showing <span id="showing-start">1</span> to <span id="showing-end">10</span> of <span id="total-items">0</span> collaborators
+            </div>
+            <div class="flex space-x-2">
+                <button id="prev-page" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+                    Previous
+                </button>
+                <button id="next-page" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaborator Modal -->
+    <div id="collaborator-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 id="modal-title" class="text-xl font-bold text-indigo-800">Add Project Collaborator</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="collaborator-form">
+                    <input type="hidden" id="collaborator-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="first-name" class="block text-gray-700 mb-2">First Name*</label>
+                            <input type="text" id="first-name" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="last-name" class="block text-gray-700 mb-2">Last Name*</label>
+                            <input type="text" id="last-name" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="email" class="block text-gray-700 mb-2">Email*</label>
+                            <input type="email" id="email" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-gray-700 mb-2">Phone</label>
+                            <input type="tel" id="phone"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="institution" class="block text-gray-700 mb-2">Institution/Organization*</label>
+                            <input type="text" id="institution" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="type" class="block text-gray-700 mb-2">Collaborator Type*</label>
+                            <select id="type" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                <option value="">Select Type</option>
+                                <option value="External Faculty">External Faculty</option>
+                                <option value="Industry Partner">Industry Partner</option>
+                                <option value="Research Institute">Research Institute</option>
+                                <option value="Government">Government</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="website" class="block text-gray-700 mb-2">Website</label>
+                        <input type="url" id="website"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="expertise" class="block text-gray-700 mb-2">Area of Expertise</label>
+                        <input type="text" id="expertise"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="notes" class="block text-gray-700 mb-2">Notes</label>
+                        <textarea id="notes" rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"></textarea>
+                    </div>
+                    
+                    <div class="border-t pt-4 mt-6">
+                        <h4 class="text-lg font-medium text-indigo-800 mb-4">Associated Projects</h4>
+                        <div id="project-selection" class="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <!-- Project checkboxes will be populated by JS -->
+                            <div class="text-gray-500">Loading projects...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" id="cancel-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+                            Cancel
+                        </button>
+                        <button type="submit" id="save-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                            Save Collaborator
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-red-600 mb-4">Confirm Deletion</h3>
+                <p class="text-gray-700 mb-6">Are you sure you want to delete this collaborator? This action cannot be undone.</p>
+                <div class="flex justify-end space-x-4">
+                    <button id="cancel-delete-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+                        Cancel
+                    </button>
+                    <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaborator Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-bold text-indigo-800">Collaborator Details</h3>
+                <button id="close-detail-btn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="collaborator-details" class="mb-6">
+                    <!-- Details will be populated by JS -->
+                </div>
+                
+                <div class="border-t pt-4 mt-4">
+                    <h4 class="text-lg font-semibold mb-4">Associated Projects</h4>
+                    <div id="associated-projects" class="space-y-2">
+                        <!-- Projects will be populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mt-6 space-x-4">
+                    <button id="edit-collaborator-btn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                        Edit Collaborator
+                    </button>
+                    <button id="close-details-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/collaborators.js"></script>
+</body>
+</html>
