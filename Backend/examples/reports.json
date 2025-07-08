@@ -1,0 +1,88 @@
+{
+  "faculty_report": {
+    "summary": {
+      "total_faculty": 15,
+      "position_distribution": {
+        "Professor": 5,
+        "Associate Professor": 4,
+        "Assistant Professor": 3,
+        "Lecturer": 2,
+        "Adjunct": 1
+      }
+    },
+    "faculty": [
+      {
+        "faculty_id": 1,
+        "name": "Faculty1FirstName Faculty1LastName",
+        "email": "faculty1@university.edu",
+        "position": "Associate Professor",
+        "department": "Computer Science",
+        "hire_date": "2018-07-12",
+        "research_interests": "Research interests for faculty member 1",
+        "project_count": 2,
+        "active_projects": 1,
+        "advisee_count": 3
+      },
+      {
+        "faculty_id": 2,
+        "name": "Faculty2FirstName Faculty2LastName",
+        "email": "faculty2@university.edu",
+        "position": "Professor",
+        "department": "Physics",
+        "hire_date": "2015-09-01",
+        "research_interests": "Research interests for faculty member 2",
+        "project_count": 3,
+        "active_projects": 2,
+        "advisee_count": 5
+      }
+    ]
+  },
+  "project_report": {
+    "summary": {
+      "total_projects": 10,
+      "active_projects": 7,
+      "completed_projects": 3,
+      "total_budget": 2150000.0,
+      "avg_budget": 215000.0
+    },
+    "projects": [
+      {
+        "project_id": 1,
+        "title": "Advanced Machine Learning Algorithms for Big Data",
+        "description": "Description for project 1",
+        "department": "Computer Science",
+        "start_date": "2025-01-15",
+        "end_date": null,
+        "is_active": true,
+        "budget": 275000.0,
+        "funding_source": "NSF",
+        "faculty_count": 2,
+        "student_count": 3,
+        "faculty": [
+          {
+            "id": 1,
+            "name": "Faculty1FirstName Faculty1LastName"
+          },
+          {
+            "id": 3,
+            "name": "Faculty3FirstName Faculty3LastName"
+          }
+        ],
+        "students": [
+          {
+            "id": 2,
+            "name": "Student2FirstName Student2LastName"
+          },
+          {
+            "id": 5,
+            "name": "Student5FirstName Student5LastName"
+          },
+          {
+            "id": 8,
+            "name": "Student8FirstName Student8LastName"
+          }
+        ]
+      }
+    ]
+  }
+}

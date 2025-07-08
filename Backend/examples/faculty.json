@@ -1,0 +1,46 @@
+{
+  "create_faculty": {
+    "first_name": "Richard",
+    "last_name": "Rodriguez",
+    "email": "richard.rodriguez@university.edu",
+    "phone": "555-123-4567",
+    "hire_date": "2023-03-15",
+    "position": "Assistant Professor",
+    "dept_id": 1,
+    "salary": 95000.00,
+    "research_interests": "Deep Learning, Neural Networks, Computer Vision"
+  },
+  "update_faculty": {
+    "first_name": "Richard",
+    "last_name": "Rodriguez",
+    "position": "Associate Professor",
+    "salary": 110000.00,
+    "research_interests": "Deep Learning, Neural Networks, Computer Vision, Natural Language Processing"
+  },
+  "sample_responses": [
+    {
+      "faculty_id": 1,
+      "first_name": "Faculty1FirstName",
+      "last_name": "Faculty1LastName",
+      "email": "faculty1@university.edu",
+      "phone": "555-123-4567",
+      "hire_date": "2018-07-12",
+      "position": "Associate Professor",
+      "dept_id": 1,
+      "salary": 115000.0,
+      "research_interests": "Research interests for faculty member 1"
+    },
+    {
+      "faculty_id": 2,
+      "first_name": "Faculty2FirstName",
+      "last_name": "Faculty2LastName",
+      "email": "faculty2@university.edu",
+      "phone": "555-234-5678",
+      "hire_date": "2015-09-01",
+      "position": "Professor",
+      "dept_id": 3,
+      "salary": 145000.0,
+      "research_interests": "Research interests for faculty member 2"
+    }
+  ]
+}

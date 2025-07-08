@@ -1,0 +1,93 @@
+{
+  "create_project": {
+    "title": "Advanced Neural Networks for Medical Imaging",
+    "description": "Research project focused on developing neural network models for improving medical imaging diagnostics",
+    "start_date": "2025-07-01",
+    "end_date": null,
+    "is_active": true,
+    "budget": 350000.00,
+    "funding_source": "National Institutes of Health",
+    "dept_id": 1,
+    "faculty_ids": [1, 3, 5],
+    "student_ids": [2, 4, 6, 8]
+  },
+  "update_project": {
+    "title": "Advanced Neural Networks for Medical Diagnosis",
+    "budget": 425000.00,
+    "is_active": true,
+    "faculty_ids": [1, 3, 5, 7],
+    "student_ids": [2, 4, 6, 8, 10]
+  },
+  "sample_responses": [
+    {
+      "project_id": 1,
+      "title": "Advanced Machine Learning Algorithms for Big Data",
+      "description": "Description for project 1",
+      "start_date": "2025-01-15",
+      "end_date": null,
+      "is_active": true,
+      "budget": 275000.0,
+      "funding_source": "NSF",
+      "dept_id": 1,
+      "faculty_members": [
+        {
+          "faculty_id": 1,
+          "first_name": "Faculty1FirstName",
+          "last_name": "Faculty1LastName"
+        },
+        {
+          "faculty_id": 3,
+          "first_name": "Faculty3FirstName",
+          "last_name": "Faculty3LastName"
+        }
+      ],
+      "students": [
+        {
+          "student_id": 2,
+          "first_name": "Student2FirstName",
+          "last_name": "Student2LastName"
+        },
+        {
+          "student_id": 5,
+          "first_name": "Student5FirstName",
+          "last_name": "Student5LastName"
+        },
+        {
+          "student_id": 8,
+          "first_name": "Student8FirstName",
+          "last_name": "Student8LastName"
+        }
+      ]
+    },
+    {
+      "project_id": 2,
+      "title": "Quantum Computing Applications in Cryptography",
+      "description": "Description for project 2",
+      "start_date": "2024-11-03",
+      "end_date": "2025-05-15",
+      "is_active": false,
+      "budget": 190000.0,
+      "funding_source": "DOD",
+      "dept_id": 3,
+      "faculty_members": [
+        {
+          "faculty_id": 2,
+          "first_name": "Faculty2FirstName",
+          "last_name": "Faculty2LastName"
+        }
+      ],
+      "students": [
+        {
+          "student_id": 1,
+          "first_name": "Student1FirstName",
+          "last_name": "Student1LastName"
+        },
+        {
+          "student_id": 3,
+          "first_name": "Student3FirstName",
+          "last_name": "Student3LastName"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "create_department": {
+    "dept_name": "Data Science",
+    "dept_head": "Dr. Jane Smith",
+    "research_focus": "Big Data, Machine Learning, Data Visualization",
+    "established_year": 2015,
+    "budget": 1750000.50
+  },
+  "update_department": {
+    "dept_name": "Data Science and Analytics",
+    "dept_head": "Dr. John Williams",
+    "research_focus": "Big Data, Deep Learning, Data Mining",
+    "budget": 2000000.00
+  },
+  "sample_responses": [
+    {
+      "dept_id": 1,
+      "dept_name": "Computer Science",
+      "dept_head": "Dr. Alan Turing",
+      "research_focus": "Artificial Intelligence, Machine Learning, Databases, Computer Networks",
+      "established_year": 1970,
+      "budget": 2500000.0
+    },
+    {
+      "dept_id": 2,
+      "dept_name": "Mathematics",
+      "dept_head": "Dr. Katherine Johnson",
+      "research_focus": "Number Theory, Applied Mathematics, Statistics",
+      "established_year": 1930,
+      "budget": 1800000.0
+    }
+  ]
+}
