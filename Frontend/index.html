@@ -3,167 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSEDU Portal</title>
+    <title>University Research Portal - Dashboard</title>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ApexCharts for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 min-h-screen">
     <!-- Navigation Bar -->
-    <nav class="bg-indigo-700 text-white shadow-lg">
+    <nav class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white shadow-xl sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
-                <div class="flex items-center">
-                    <a href="index.html" class="text-xl font-bold">CSEDU Portal</a>
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white rounded-full p-2">
+                        <i class="fas fa-university text-blue-800 text-xl"></i>
+                    </div>
+                    <div>
+                        <a href="index.html" class="text-xl font-bold hover:text-blue-200 transition-colors">
+                            University Research Portal
+                        </a>
+                        <p class="text-xs text-blue-200">Academic Excellence & Innovation</p>
+                    </div>
                 </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="index.html" class="hover:text-indigo-200">Dashboard</a>
-                    <a href="pages/departments.html" class="hover:text-indigo-200">Departments</a>
-                    <a href="pages/faculty.html" class="hover:text-indigo-200">Faculty</a>
-                    <a href="pages/students.html" class="hover:text-indigo-200">Students</a>
-                    <a href="pages/projects.html" class="hover:text-indigo-200">Projects</a>
-                    <a href="pages/publications.html" class="hover:text-indigo-200">Publications</a>
-                    <a href="pages/funding.html" class="hover:text-indigo-200">Funding</a>
-                    <a href="pages/collaborators.html" class="hover:text-indigo-200">Collaborators</a>
-                    <a href="pages/student-research.html" class="hover:text-indigo-200">Student Research</a>
-                    <a href="pages/reports.html" class="hover:text-indigo-200">Reports</a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1 text-blue-200">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <div class="relative group">
+                        <button class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                            <i class="fas fa-building"></i>
+                            <span>Structure</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <a href="pages/departments.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-t-lg">
+                                <i class="fas fa-building mr-2"></i>Departments
+                            </a>
+                            <a href="pages/faculty.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-chalkboard-teacher mr-2"></i>Faculty
+                            </a>
+                            <a href="pages/students.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-b-lg">
+                                <i class="fas fa-user-graduate mr-2"></i>Students
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <button class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                            <i class="fas fa-flask"></i>
+                            <span>Research</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <a href="pages/projects.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-t-lg">
+                                <i class="fas fa-project-diagram mr-2"></i>Projects
+                            </a>
+                            <a href="pages/publications.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-book mr-2"></i>Publications
+                            </a>
+                            <a href="pages/funding.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-dollar-sign mr-2"></i>Funding
+                            </a>
+                            <a href="pages/collaborators.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-handshake mr-2"></i>Collaborators
+                            </a>
+                            <a href="pages/student-research.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-b-lg">
+                                <i class="fas fa-user-cog mr-2"></i>Student Research
+                            </a>
+                        </div>
+                    </div>
+                    <a href="pages/reports.html" class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
                 </div>
-                <div class="md:hidden">
-                    <button id="menu-toggle" class="focus:outline-none">
-                        <i class="fas fa-bars"></i>
+
+                <!-- Auth Buttons -->
+                <div class="hidden lg:flex items-center space-x-3">
+                    <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button class="bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <div class="lg:hidden">
+                    <button id="mobile-menu-toggle" class="focus:outline-none hover:text-blue-200 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
-            <!-- Mobile menu -->
-            <div id="mobile-menu" class="hidden md:hidden pb-4">
-                <a href="index.html" class="block py-2 hover:text-indigo-200">Dashboard</a>
-                <a href="pages/departments.html" class="block py-2 hover:text-indigo-200">Departments</a>
-                <a href="pages/faculty.html" class="block py-2 hover:text-indigo-200">Faculty</a>
-                <a href="pages/students.html" class="block py-2 hover:text-indigo-200">Students</a>
-                <a href="pages/projects.html" class="block py-2 hover:text-indigo-200">Projects</a>
-                <a href="pages/publications.html" class="block py-2 hover:text-indigo-200">Publications</a>
-                <a href="pages/funding.html" class="block py-2 hover:text-indigo-200">Funding</a>
-                <a href="pages/collaborators.html" class="block py-2 hover:text-indigo-200">Collaborators</a>
-                <a href="pages/student-research.html" class="block py-2 hover:text-indigo-200">Student Research</a>
-                <a href="pages/reports.html" class="block py-2 hover:text-indigo-200">Reports</a>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="lg:hidden hidden pb-4 border-t border-blue-700">
+                <div class="space-y-2 pt-4">
+                    <a href="index.html" class="block py-2 px-4 bg-blue-700 rounded transition-colors text-blue-200">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    
+                    <!-- Structure Section -->
+                    <div class="border-b border-blue-700 pb-2">
+                        <p class="text-blue-300 text-sm font-semibold px-4 py-1">Structure</p>
+                        <a href="pages/departments.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-building mr-2"></i>Departments
+                        </a>
+                        <a href="pages/faculty.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Faculty
+                        </a>
+                        <a href="pages/students.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user-graduate mr-2"></i>Students
+                        </a>
+                    </div>
+
+                    <!-- Research Section -->
+                    <div class="border-b border-blue-700 pb-2">
+                        <p class="text-blue-300 text-sm font-semibold px-4 py-1">Research</p>
+                        <a href="pages/projects.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-project-diagram mr-2"></i>Projects
+                        </a>
+                        <a href="pages/publications.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-book mr-2"></i>Publications
+                        </a>
+                        <a href="pages/funding.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-dollar-sign mr-2"></i>Funding
+                        </a>
+                        <a href="pages/collaborators.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-handshake mr-2"></i>Collaborators
+                        </a>
+                        <a href="pages/student-research.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user-cog mr-2"></i>Student Research
+                        </a>
+                    </div>
+
+                    <a href="pages/reports.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition-colors">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </a>
+
+                    <!-- Mobile Auth Buttons -->
+                    <div class="pt-4 space-y-2">
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                        <button class="w-full bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-6 text-indigo-800">University Research Dashboard</h1>
-        
-        <!-- Loading Indicator -->
-        <div id="loading" class="text-center py-10">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-            <p class="mt-2 text-indigo-600">Loading dashboard data...</p>
-        </div>
-
-        <!-- Dashboard Stats -->
-        <div id="dashboard-stats" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <!-- Stats cards will be populated by JS -->
-        </div>
-
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Students by Program</h2>
-                <div id="students-program-chart" class="h-64"></div>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Active Projects Status</h2>
-                <div id="projects-budget-chart" class="h-64"></div>
-            </div>
-        </div>
-
-        <!-- Recent Projects -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-semibold mb-4">Active Research Projects</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-indigo-50">
-                        <tr>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Title</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Department</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Budget</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Funding Source</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-indigo-800">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="active-projects">
-                        <!-- Projects will be populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Quick Access Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <!-- Project Collaborators Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold">Project Collaborators</h2>
-                    <span class="text-indigo-600"><i class="fas fa-users"></i></span>
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                University Research Portal
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 text-blue-200">
+                Advancing Knowledge Through Collaborative Research & Innovation
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <div class="flex items-center space-x-2 text-blue-200">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                    <span class="text-lg">Real-time Analytics</span>
                 </div>
-                <p class="text-gray-600 mb-4">Manage external collaborations and partnerships across research projects.</p>
-                <div class="mt-4">
-                    <a href="pages/collaborators.html" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
-                        Manage Collaborators <i class="fas fa-arrow-right ml-2"></i>
+                <div class="flex items-center space-x-2 text-blue-200">
+                    <i class="fas fa-users text-2xl"></i>
+                    <span class="text-lg">Collaborative Platform</span>
+                </div>
+                <div class="flex items-center space-x-2 text-blue-200">
+                    <i class="fas fa-globe text-2xl"></i>
+                    <span class="text-lg">Global Research Network</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Stats Cards -->
+    <section class="py-12 -mt-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Total Faculty</p>
+                            <p class="text-3xl font-bold text-blue-600" id="total-faculty">-</p>
+                            <p class="text-green-500 text-sm">
+                                <i class="fas fa-arrow-up"></i> 8% from last semester
+                            </p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-chalkboard-teacher text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Active Projects</p>
+                            <p class="text-3xl font-bold text-green-600" id="active-projects">-</p>
+                            <p class="text-green-500 text-sm">
+                                <i class="fas fa-arrow-up"></i> 15% from last month
+                            </p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-project-diagram text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Publications</p>
+                            <p class="text-3xl font-bold text-purple-600" id="total-publications">-</p>
+                            <p class="text-green-500 text-sm">
+                                <i class="fas fa-arrow-up"></i> 23% from last year
+                            </p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <i class="fas fa-book text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium">Total Funding</p>
+                            <p class="text-3xl font-bold text-orange-600" id="total-funding">-</p>
+                            <p class="text-green-500 text-sm">
+                                <i class="fas fa-arrow-up"></i> $2.1M this year
+                            </p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full p-3">
+                            <i class="fas fa-dollar-sign text-orange-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Charts and Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Research Funding Trends -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Research Funding Trends</h3>
+                    <button class="text-blue-600 hover:text-blue-800 transition-colors">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+                <div id="funding-chart"></div>
+            </div>
+
+            <!-- Publications by Department -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Publications by Department</h3>
+                    <button class="text-blue-600 hover:text-blue-800 transition-colors">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+                <div id="publications-chart"></div>
+            </div>
+        </div>
+
+        <!-- Research Activity Overview -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Recent Projects -->
+            <div class="xl:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Recent Research Projects</h3>
+                    <a href="pages/projects.html" class="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
-            </div>
-            
-            <!-- Student Research Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold">Student Research</h2>
-                    <span class="text-indigo-600"><i class="fas fa-microscope"></i></span>
+                <div id="recent-projects" class="space-y-4">
+                    <!-- Projects will be loaded here -->
                 </div>
-                <p class="text-gray-600 mb-4">Track and manage student thesis, dissertations, and research activities.</p>
-                <div class="mt-4">
-                    <a href="pages/student-research.html" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
-                        View Student Research <i class="fas fa-arrow-right ml-2"></i>
+            </div>
+
+            <!-- Top Researchers -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Top Researchers</h3>
+                    <a href="pages/faculty.html" class="text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
+                <div id="top-researchers" class="space-y-4">
+                    <!-- Researchers will be loaded here -->
+                </div>
             </div>
         </div>
-        
-        <!-- Department with most faculty -->
-        <div id="top-department-card" class="bg-white p-6 rounded-lg shadow-md mb-10">
-            <h2 class="text-xl font-semibold mb-4">Department Spotlight</h2>
-            <div id="top-department-content">
-                <!-- Content will be populated by JS -->
+
+        <!-- Research Areas Grid -->
+        <section class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center">Research Areas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-robot text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Artificial Intelligence</h3>
+                    </div>
+                    <p class="text-blue-100 mb-4">Machine Learning, Deep Learning, Computer Vision</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">15 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-shield-alt text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Cybersecurity</h3>
+                    </div>
+                    <p class="text-green-100 mb-4">Network Security, Cryptography, IoT Security</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">8 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-atom text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Quantum Computing</h3>
+                    </div>
+                    <p class="text-purple-100 mb-4">Quantum Algorithms, Quantum Cryptography</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">5 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-dna text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Biotechnology</h3>
+                    </div>
+                    <p class="text-orange-100 mb-4">Genomics, Bioinformatics, Molecular Biology</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">12 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-solar-panel text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Renewable Energy</h3>
+                    </div>
+                    <p class="text-teal-100 mb-4">Smart Grids, Energy Storage, Power Systems</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">10 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-brain text-3xl mr-4"></i>
+                        <h3 class="text-xl font-semibold">Neuroscience</h3>
+                    </div>
+                    <p class="text-indigo-100 mb-4">Brain Computer Interfaces, Neural Networks</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">7 Active Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-indigo-900 text-white py-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p>&copy; 2023 CSEDU Portal</p>
+    <footer class="bg-gray-900 text-white">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- University Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-blue-600 rounded-full p-2">
+                            <i class="fas fa-university text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">University Research Portal</h3>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Advancing knowledge through collaborative research, innovation, and academic excellence. 
+                        Connecting researchers, faculty, and students in a unified platform.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i class="fab fa-facebook-f text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i class="fab fa-twitter text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i class="fab fa-linkedin-in text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i class="fab fa-github text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i class="fab fa-youtube text-lg"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="flex space-x-4">
-                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" class="hover:text-indigo-300"><i class="fab fa-github"></i></a>
+
+                <!-- Quick Links -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-blue-400">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="index.html" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-home mr-2 text-sm"></i>Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="pages/departments.html" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-building mr-2 text-sm"></i>Departments
+                            </a>
+                        </li>
+                        <li>
+                            <a href="pages/faculty.html" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-chalkboard-teacher mr-2 text-sm"></i>Faculty
+                            </a>
+                        </li>
+                        <li>
+                            <a href="pages/projects.html" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-project-diagram mr-2 text-sm"></i>Research Projects
+                            </a>
+                        </li>
+                        <li>
+                            <a href="pages/publications.html" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-book mr-2 text-sm"></i>Publications
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Research Areas -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-blue-400">Research Areas</h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-robot mr-2 text-sm"></i>Artificial Intelligence
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-shield-alt mr-2 text-sm"></i>Cybersecurity
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-atom mr-2 text-sm"></i>Quantum Computing
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-dna mr-2 text-sm"></i>Biotechnology
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition-colors flex items-center">
+                                <i class="fas fa-solar-panel mr-2 text-sm"></i>Renewable Energy
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-blue-400">Contact Information</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-map-marker-alt text-blue-400 mt-1"></i>
+                            <div>
+                                <p class="text-gray-300 text-sm">
+                                    123 University Avenue<br>
+                                    Research Building, Floor 3<br>
+                                    Academic City, AC 12345
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-blue-400"></i>
+                            <p class="text-gray-300 text-sm">+1 (555) 123-4567</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-blue-400"></i>
+                            <p class="text-gray-300 text-sm">research@university.edu</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            <p class="text-gray-300 text-sm">Mon - Fri: 8:00 AM - 6:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-gray-700 mt-8 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="text-gray-400 text-sm">
+                        © 2024 University Research Portal. All rights reserved.
+                    </div>
+                    <div class="flex flex-wrap justify-center md:justify-end space-x-6 text-sm">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Accessibility</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Help Center</a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- ApexCharts for data visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <style>
+    .nav-link {
+        position: relative;
+        padding: 0.5rem 0;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 50%;
+        background-color: #93C5FD;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+    /* Dropdown animation */
+    .group:hover .group-hover\:visible {
+        visibility: visible;
+    }
+
+    .group:hover .group-hover\:opacity-100 {
+        opacity: 1;
+    }
+
+    #back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    </style>
+
     <!-- Custom JS -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/navigation.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+        
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        // Show/hide back to top button
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+        
+        // Smooth scroll to top
+        backToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+    </script>
 </body>
 </html>

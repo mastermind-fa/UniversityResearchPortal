@@ -11,33 +11,18 @@ from app.schemas.projects import ProjectCreate, ProjectUpdate, Project as Projec
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
-@router.post("/", response_model=ProjectSchema)
+@router.post("/", response_model=ProjectSchema, status_code=201)
 def create_project(project: ProjectCreate, db: Session = Depends(get_db)):
     """Create a new research project"""
-    # Extract faculty_ids and student_ids from the request
-    faculty_ids = project.faculty_ids or []
-    student_ids = project.student_ids or []
-    
-    # Create project object without the relations
-    project_data = project.model_dump(exclude={"faculty_ids", "student_ids"})
+    # Create project object directly from the schema
+    project_data = project.model_dump()
     db_project = Project(**project_data)
     
     # Add project to session
     db.add(db_project)
-    db.flush()  # Flush to get the project_id
-    
-    # Add faculty members to project
-    if faculty_ids:
-        faculty_members = db.query(Faculty).filter(Faculty.faculty_id.in_(faculty_ids)).all()
-        db_project.faculty_members.extend(faculty_members)
-    
-    # Add students to project
-    if student_ids:
-        students = db.query(Student).filter(Student.student_id.in_(student_ids)).all()
-        db_project.students.extend(students)
-    
     db.commit()
     db.refresh(db_project)
+    
     return db_project
 
 

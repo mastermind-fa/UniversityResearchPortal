@@ -1,10 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import departments, faculty, students, projects, analytics, reports
+from app.api.routes import (
+    departments, faculty, students, projects, publications, 
+    funding, collaborators, student_research, analytics, reports
+)
 from app.db.session import create_tables
 
-app = FastAPI(title="University Research Portal API")
+app = FastAPI(
+    title="University Research Portal API",
+    description="Comprehensive University Research Management System API",
+    version="1.0.0"
+)
 
 # Configure CORS
 app.add_middleware(
@@ -21,16 +28,28 @@ async def startup():
     create_tables()
 
 # Include API routes
-app.include_router(departments.router)
-app.include_router(faculty.router)
-app.include_router(students.router)
-app.include_router(projects.router)
-app.include_router(analytics.router)
-app.include_router(reports.router)
+app.include_router(departments.router, prefix="/api", tags=["departments"])
+app.include_router(faculty.router, prefix="/api", tags=["faculty"])
+app.include_router(students.router, prefix="/api", tags=["students"])
+app.include_router(projects.router, prefix="/api", tags=["projects"])
+app.include_router(publications.router, prefix="/api", tags=["publications"])
+app.include_router(funding.router, prefix="/api", tags=["funding"])
+app.include_router(collaborators.router, prefix="/api", tags=["collaborators"])
+app.include_router(student_research.router, prefix="/api", tags=["student-research"])
+app.include_router(analytics.router, prefix="/api", tags=["analytics"])
+app.include_router(reports.router, prefix="/api", tags=["reports"])
 
 @app.get("/")
 def read_root():
-    return {"message": "University Research Portal API"}
+    return {
+        "message": "University Research Portal API",
+        "version": "1.0.0",
+        "description": "Advancing Knowledge Through Collaborative Research & Innovation"
+    }
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "university-research-portal"}
 
 if __name__ == "__main__":
     import uvicorn

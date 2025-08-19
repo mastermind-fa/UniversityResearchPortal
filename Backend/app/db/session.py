@@ -25,5 +25,5 @@ def get_db():
 
 # Function to create all tables
 def create_tables():
-    from app.models import departments, faculty, students
+    from app.models import departments, faculty, students, projects
     Base.metadata.create_all(bind=engine)

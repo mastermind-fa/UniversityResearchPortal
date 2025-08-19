@@ -9,7 +9,7 @@ from app.schemas.departments import DepartmentCreate, DepartmentUpdate, Departme
 router = APIRouter(prefix="/departments", tags=["departments"])
 
 
-@router.post("/", response_model=DepartmentSchema)
+@router.post("/", response_model=DepartmentSchema, status_code=201)
 def create_department(department: DepartmentCreate, db: Session = Depends(get_db)):
     """Create a new department"""
     db_department = Department(**department.model_dump())
