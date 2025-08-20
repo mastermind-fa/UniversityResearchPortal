@@ -453,30 +453,38 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading();
         
         try {
-            // Build query parameters for projects API
-            const params = new URLSearchParams();
-            
-            if (deptId) {
-                params.append('department_id', deptId);
-            }
-            
-            if (status !== '') {
-                params.append('status', status === 'true' ? 'Active' : 'Completed');
-            }
-            
-            // Fetch projects data
-            let endpoint = CONFIG.ENDPOINTS.PROJECTS;
-            if (params.toString()) {
-                endpoint += `?${params.toString()}`;
-            }
-            
-            const response = await fetch(CONFIG.API_BASE_URL + endpoint);
             let projects = [];
-            if (response.ok) {
-                projects = await response.json();
+            
+            // Use the correct endpoint based on department selection
+            if (deptId) {
+                // Use department-specific endpoint
+                const response = await fetch(CONFIG.API_BASE_URL + `${CONFIG.ENDPOINTS.PROJECTS_BY_DEPARTMENT}/${deptId}`);
+                if (response.ok) {
+                    projects = await response.json();
+                }
+            } else {
+                // Use general projects endpoint for all departments
+                const response = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.PROJECTS);
+                if (response.ok) {
+                    projects = await response.json();
+                }
             }
             
             if (!projects || projects.length === 0) {
+                showNoData();
+                return;
+            }
+            
+            // Apply status filter if selected
+            if (status !== '') {
+                const isActive = status === 'true';
+                projects = projects.filter(project => {
+                    const projectStatus = project.status || (project.is_active ? 'Active' : 'Completed');
+                    return isActive ? projectStatus === 'Active' : projectStatus === 'Completed';
+                });
+            }
+            
+            if (projects.length === 0) {
                 showNoData();
                 return;
             }
@@ -487,20 +495,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const completedProjects = totalProjects - activeProjects;
             const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
             
-            // Group projects by department
+            // Group projects by department for charts
             const projectsByDept = {};
             projects.forEach(project => {
-                const deptId = project.dept_id || project.department_id;
-                if (!projectsByDept[deptId]) {
-                    projectsByDept[deptId] = {
+                const projectDeptId = project.dept_id;
+                if (!projectsByDept[projectDeptId]) {
+                    projectsByDept[projectDeptId] = {
                         project_count: 0,
                         total_budget: 0,
                         projects: []
                     };
                 }
-                projectsByDept[deptId].project_count++;
-                projectsByDept[deptId].total_budget += (project.budget || 0);
-                projectsByDept[deptId].projects.push(project);
+                projectsByDept[projectDeptId].project_count++;
+                projectsByDept[projectDeptId].total_budget += (project.budget || 0);
+                projectsByDept[projectDeptId].projects.push(project);
             });
             
             // Set title and subtitle
@@ -576,8 +584,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
-            // Projects by department chart
-            if (Object.keys(projectsByDept).length > 0) {
+            // Projects by department chart (only show if multiple departments or if showing all departments)
+            if (Object.keys(projectsByDept).length > 1 || !deptId) {
                 content += `
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                         <div class="chart-container">
@@ -615,9 +623,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${projects.map(project => `
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">${project.project_title || project.title || 'Untitled Project'}</div>
+                                                <div class="text-sm font-medium text-gray-900">${project.project_title || 'Untitled Project'}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${getDepartmentName(project.dept_id || project.department_id)}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${getDepartmentName(project.dept_id)}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="px-3 py-1 text-xs font-medium rounded-full ${(project.status === 'Active' || project.is_active) ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
                                                     ${(project.status === 'Active' || project.is_active) ? 'Active' : 'Completed'}
@@ -638,8 +646,8 @@ document.addEventListener('DOMContentLoaded', function() {
             reportBody.innerHTML = content;
             showReport();
             
-            // Render charts if data is available
-            if (Object.keys(projectsByDept).length > 0) {
+            // Render charts if data is available and multiple departments
+            if (Object.keys(projectsByDept).length > 1 || !deptId) {
                 renderDepartmentChart(projectsByDept);
                 renderBudgetChart(projectsByDept);
             }
@@ -797,13 +805,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const deptNames = [];
         const projectCounts = [];
         
-        // Extract data
+        // Extract data and filter out any invalid entries
         for (const deptId in deptData) {
             const dept = departments.find(d => d.dept_id == deptId);
-            if (dept) {
+            if (dept && deptData[deptId].project_count > 0) {
                 deptNames.push(dept.dept_name);
                 projectCounts.push(deptData[deptId].project_count);
             }
+        }
+        
+        // Only render chart if we have valid data
+        if (deptNames.length === 0 || projectCounts.length === 0) {
+            chartEl.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No department data available</div>';
+            return;
         }
         
         // Sort by project count
@@ -868,7 +882,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         fontSize: '12px'
                     }
                 }
-            },
+                },
             yaxis: {
                 labels: {
                     style: {
@@ -901,13 +915,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const deptNames = [];
         const budgetAmounts = [];
         
-        // Extract data
+        // Extract data and filter out any invalid entries
         for (const deptId in deptData) {
             const dept = departments.find(d => d.dept_id == deptId);
-            if (dept) {
+            if (dept && deptData[deptId].total_budget > 0) {
                 deptNames.push(dept.dept_name);
                 budgetAmounts.push(deptData[deptId].total_budget);
             }
+        }
+        
+        // Only render chart if we have valid data
+        if (deptNames.length === 0 || budgetAmounts.length === 0) {
+            chartEl.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No budget data available</div>';
+            return;
         }
         
         // Calculate percentages for display
@@ -951,9 +971,12 @@ document.addEventListener('DOMContentLoaded', function() {
             dataLabels: {
                 enabled: true,
                 formatter: function (val, opts) {
-                    const percentage = budgetPercentages[opts.dataPointIndex];
-                    const amount = formatCurrency(val);
-                    return `${percentage}%\n${amount}`;
+                    if (opts.dataPointIndex < budgetPercentages.length) {
+                        const percentage = budgetPercentages[opts.dataPointIndex];
+                        const amount = formatCurrency(val);
+                        return `${percentage}%\n${amount}`;
+                    }
+                    return '';
                 },
                 style: {
                     fontSize: '11px',
