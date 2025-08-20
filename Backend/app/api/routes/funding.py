@@ -39,6 +39,51 @@ def get_funding_sources(
     funding_sources = query.order_by(FundingSource.source_name).all()
     return funding_sources
 
+@router.get("/funding-sources/summary")
+def get_funding_summary(db: Session = Depends(get_db)):
+    """Get funding summary statistics for dashboard"""
+    # Total funding across all projects
+    total_funding = db.query(func.sum(ProjectFunding.amount)).scalar() or 0
+    
+    # Total funding by funding source type
+    funding_by_type = db.query(
+        FundingSource.source_type,
+        func.sum(ProjectFunding.amount).label("total_amount")
+    ).join(ProjectFunding, FundingSource.funding_id == ProjectFunding.funding_id)\
+     .group_by(FundingSource.source_type)\
+     .all()
+    
+    funding_by_type_dict = {item.source_type: item.total_amount for item in funding_by_type}
+    
+    # Total funding by year
+    funding_by_year = db.query(
+        func.extract('year', ProjectFunding.start_date).label('year'),
+        func.sum(ProjectFunding.amount).label("total_amount")
+    ).group_by(func.extract('year', ProjectFunding.start_date))\
+     .order_by(func.extract('year', ProjectFunding.start_date))\
+     .all()
+    
+    funding_by_year_dict = {int(item.year): item.total_amount for item in funding_by_year if item.year is not None}
+    
+    # Top funding sources
+    top_sources = db.query(
+        FundingSource.source_name,
+        func.sum(ProjectFunding.amount).label("total_amount")
+    ).join(ProjectFunding, FundingSource.funding_id == ProjectFunding.funding_id)\
+     .group_by(FundingSource.funding_id, FundingSource.source_name)\
+     .order_by(func.sum(ProjectFunding.amount).desc())\
+     .limit(5)\
+     .all()
+    
+    top_sources_list = [{"source_name": item.source_name, "total_amount": item.total_amount} for item in top_sources]
+    
+    return {
+        "total_funding": total_funding,
+        "funding_by_type": funding_by_type_dict,
+        "funding_by_year": funding_by_year_dict,
+        "top_funding_sources": top_sources_list
+    }
+
 @router.get("/funding-sources/{funding_id}", response_model=FundingSourceWithProjects)
 def get_funding_source(funding_id: int, db: Session = Depends(get_db)):
     """Get a specific funding source by ID with funded projects"""

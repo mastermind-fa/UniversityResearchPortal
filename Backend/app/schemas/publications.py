@@ -1,20 +1,16 @@
 from typing import List, Optional
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PublicationAuthor(BaseModel):
     faculty_id: int
+    name: Optional[str] = None
     author_order: int
-    is_corresponding: bool = False
+    is_corresponding: str = Field("N", pattern="^[YN]$")
 
     class Config:
         from_attributes = True
-
-
-from typing import Optional, List
-from datetime import date
-from pydantic import BaseModel, Field
 
 
 class PublicationBase(BaseModel):
@@ -50,37 +46,6 @@ class PublicationInDB(PublicationBase):
 
 class Publication(PublicationInDB):
     pass
-
-
-# Publication Author schemas
-class PublicationAuthorBase(BaseModel):
-    author_id: int
-    publication_id: int
-    is_corresponding: str = Field("N", pattern="^[YN]$")
-
-
-class PublicationAuthorCreate(PublicationAuthorBase):
-    pass
-
-
-class PublicationAuthor(PublicationAuthorBase):
-    class Config:
-        from_attributes = True
-
-
-class PublicationCreate(PublicationBase):
-    authors: Optional[List[PublicationAuthor]] = []
-
-
-class PublicationUpdate(PublicationBase):
-    authors: Optional[List[PublicationAuthor]] = None
-
-
-class PublicationInDB(PublicationBase):
-    publication_id: int
-
-    class Config:
-        from_attributes = True
 
 
 class PublicationWithAuthors(PublicationInDB):

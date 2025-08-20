@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterTypeSelect = document.getElementById('filter-type');
     const filterYearSelect = document.getElementById('filter-year');
     const searchBtn = document.getElementById('search-btn');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+    const resultsCountEl = document.getElementById('results-count');
+    
+    // Statistics elements
+    const totalPublicationsCount = document.getElementById('total-publications-count');
+    const journalArticlesCount = document.getElementById('journal-articles-count');
+    const totalCitationsCount = document.getElementById('total-citations-count');
+    const totalAuthorsCount = document.getElementById('total-authors-count');
 
     // Form fields
     const pubIdInput = document.getElementById('pub-id');
@@ -54,6 +62,34 @@ document.addEventListener('DOMContentLoaded', function() {
         loadPublications();
     });
 
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            pubSearchInput.focus();
+        }
+    });
+
+    // Search input events
+    pubSearchInput.addEventListener('input', debounce(() => {
+        currentPage = 1;
+        loadPublications();
+    }, 300));
+
+    // Filter change events
+    filterTypeSelect.addEventListener('change', () => {
+        currentPage = 1;
+        loadPublications();
+    });
+
+    filterYearSelect.addEventListener('change', () => {
+        currentPage = 1;
+        loadPublications();
+    });
+
+    // Clear filters
+    clearFiltersBtn.addEventListener('click', clearFilters);
+
     // Modal events
     addPublicationBtn.addEventListener('click', showAddPublicationModal);
     closeModalBtn.addEventListener('click', closeModal);
@@ -73,6 +109,20 @@ document.addEventListener('DOMContentLoaded', function() {
         detailModal.classList.add('hidden');
     });
 
+    // Close modal when clicking outside
+    detailModal.addEventListener('click', (e) => {
+        if (e.target === detailModal) {
+            detailModal.classList.add('hidden');
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !detailModal.classList.contains('hidden')) {
+            detailModal.classList.add('hidden');
+        }
+    });
+
     /**
      * Initialize the page
      */
@@ -87,7 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
         await loadProjects();
         
         // Load initial publications
-        loadPublications();
+        await loadPublications();
+        await loadStatistics();
         
         // Setup event delegation for action buttons
         setupEventDelegation();
@@ -144,24 +195,83 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * Load publication statistics
+     */
+    async function loadStatistics() {
+        try {
+            if (currentPublications.length > 0) {
+                // Calculate statistics
+                const totalPublications = currentPublications.length;
+                const journalArticles = currentPublications.filter(pub => 
+                    pub.publication_type === 'Journal Article'
+                ).length;
+                const totalCitations = currentPublications.reduce((sum, pub) => 
+                    sum + (pub.citation_count || 0), 0
+                );
+                
+                // Count unique authors (this would need to be calculated from author data)
+                const uniqueAuthors = new Set();
+                currentPublications.forEach(pub => {
+                    if (pub.authors) {
+                        pub.authors.forEach(author => {
+                            uniqueAuthors.add(author.faculty_id);
+                        });
+                    }
+                });
+                const totalAuthors = uniqueAuthors.size;
+                
+                // Update statistics display
+                if (totalPublicationsCount) totalPublicationsCount.textContent = totalPublications;
+                if (journalArticlesCount) journalArticlesCount.textContent = journalArticles;
+                if (totalCitationsCount) totalCitationsCount.textContent = totalCitations;
+                if (totalAuthorsCount) totalAuthorsCount.textContent = totalAuthors;
+                
+                console.log('Statistics loaded:', { 
+                    totalPublications, 
+                    journalArticles, 
+                    totalCitations, 
+                    totalAuthors 
+                });
+            }
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+        }
+    }
+
+    /**
      * Setup event delegation for action buttons
      */
     function setupEventDelegation() {
-        // Handle table actions: view, edit, delete
-        publicationsTableBody.addEventListener('click', (e) => {
+        // Handle card actions: view, edit, delete
+        const publicationsGrid = document.getElementById('publications-grid');
+        if (publicationsGrid) {
+            console.log('🎯 Setting up event delegation for publications grid');
+                    publicationsGrid.addEventListener('click', (e) => {
+            console.log('🎯 Grid click event:', e.target.tagName, e.target.className);
+            
             const target = e.target.closest('button');
-            if (!target) return;
+            if (!target) {
+                console.log('🎯 No button found in click target');
+                return;
+            }
             
             const pubId = target.dataset.id;
+            console.log('🎯 Button clicked:', target.className, 'Publication ID:', pubId, 'Dataset:', target.dataset);
             
             if (target.classList.contains('view-btn')) {
+                console.log('👁️ View button clicked for publication:', pubId);
                 showPublicationDetails(pubId);
             } else if (target.classList.contains('edit-btn')) {
+                console.log('✏️ Edit button clicked for publication:', pubId);
                 showEditPublicationModal(pubId);
             } else if (target.classList.contains('delete-btn')) {
+                console.log('🗑️ Delete button clicked for publication:', pubId);
                 showDeleteConfirmation(pubId);
             }
         });
+        } else {
+            console.error('❌ Publications grid not found for event delegation');
+        }
     }
 
     /**
@@ -203,14 +313,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Fetch publications
-            const response = await fetchAPI(endpoint);
+            const response = await fetch(CONFIG.API_BASE_URL + endpoint);
+            console.log('📡 Publications API response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('📊 Publications data received:', data);
             
             // Update state
-            currentPublications = response.items || response;
-            totalPages = response.total_pages || 1;
+            currentPublications = data.items || data;
+            totalPages = data.total_pages || 1;
+            
+            console.log('📋 Processed publications:', {
+                count: currentPublications.length,
+                totalPages: totalPages,
+                firstPublication: currentPublications[0]
+            });
             
             // Render publications
             renderPublications();
+            
+            // Load statistics
+            await loadStatistics();
         } catch (error) {
             console.error('Error loading publications:', error);
             showNotification('Error loading publications', 'error');
@@ -218,8 +344,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    /**
-     * Render publications table
+        /**
+     * Render publications in card layout
      */
     function renderPublications() {
         // Hide loading
@@ -233,63 +359,154 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show publications list
         publicationsList.classList.remove('hidden');
         
-        // Clear existing rows
-        publicationsTableBody.innerHTML = '';
+        // Clear existing cards
+        const publicationsGrid = document.getElementById('publications-grid');
+        publicationsGrid.innerHTML = '';
         
-        // Add publication rows
-        currentPublications.forEach(pub => {
-            const row = document.createElement('tr');
+        // Add publication cards
+        currentPublications.forEach((pub, index) => {
+            const card = document.createElement('div');
+            card.className = 'publication-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300';
             
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">${pub.title}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-500">${pub.publication_type}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-500">${pub.journal_name || 'N/A'}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-500">${formatDate(pub.publication_date)}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${pub.citation_count || '0'}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button class="view-btn text-indigo-600 hover:text-indigo-900 mr-3" data-id="${pub.publication_id}">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="edit-btn text-blue-600 hover:text-blue-900 mr-3" data-id="${pub.publication_id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="delete-btn text-red-600 hover:text-red-900" data-id="${pub.publication_id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
+            // Get type badge color
+            const typeBadgeColor = getTypeBadgeColor(pub.publication_type);
+            
+            console.log(`🎨 Rendering publication card ${index + 1}:`, {
+                id: pub.publication_id,
+                title: pub.title,
+                type: pub.publication_type
+            });
+            
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <span class="type-badge ${typeBadgeColor}">${pub.publication_type}</span>
+                    <span class="citation-badge">${pub.citation_count || '0'} citations</span>
+                </div>
+                
+                <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2">${pub.title}</h3>
+                
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-newspaper w-4 mr-2 text-indigo-500"></i>
+                        <span>${pub.journal_name || 'Journal not specified'}</span>
+                    </div>
+                    
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-calendar w-4 mr-2 text-indigo-500"></i>
+                        <span>${formatDate(pub.publication_date)}</span>
+                    </div>
+                    
+                    ${pub.doi ? `
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-link w-4 mr-2 text-indigo-500"></i>
+                        <span class="truncate">${pub.doi}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user-edit mr-1"></i>
+                            ${pub.authors ? pub.authors.length : 0} authors
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="view-btn action-btn text-indigo-600 hover:text-indigo-800 p-2 rounded-lg hover:bg-indigo-50 transition-colors" data-id="${pub.publication_id}" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="edit-btn action-btn text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors" data-id="${pub.publication_id}" title="Edit Publication">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn action-btn text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors" data-id="${pub.publication_id}" title="Delete Publication">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
             
-            publicationsTableBody.appendChild(row);
+            publicationsGrid.appendChild(card);
         });
         
         // Update pagination
         renderPagination();
+        
+        // Update results count
+        updateResultsCount();
+    }
+
+    /**
+     * Get type badge color class
+     */
+    function getTypeBadgeColor(type) {
+        const colors = {
+            'Journal Article': 'bg-green-100 text-green-800',
+            'Conference Paper': 'bg-blue-100 text-blue-800',
+            'Book Chapter': 'bg-purple-100 text-purple-800',
+            'Book': 'bg-indigo-100 text-indigo-800',
+            'Patent': 'bg-orange-100 text-orange-800'
+        };
+        return colors[type] || 'bg-gray-100 text-gray-800';
+    }
+
+    /**
+     * Update results count display
+     */
+    function updateResultsCount() {
+        if (resultsCountEl) {
+            const total = currentPublications.length;
+            const searchQuery = pubSearchInput.value.trim();
+            const typeFilter = filterTypeSelect.value;
+            const yearFilter = filterYearSelect.value;
+            
+            if (searchQuery || typeFilter || yearFilter) {
+                resultsCountEl.textContent = `Showing ${total} filtered publications`;
+            } else {
+                resultsCountEl.textContent = `Showing all ${total} publications`;
+            }
+        }
     }
 
     /**
      * Render pagination controls
      */
     function renderPagination() {
-        paginationContainer.innerHTML = '';
+        const prevBtn = document.getElementById('prev-page');
+        const nextBtn = document.getElementById('next-page');
+        const showingStart = document.getElementById('showing-start');
+        const showingEnd = document.getElementById('showing-end');
+        const totalItems = document.getElementById('total-items');
         
-        if (totalPages <= 1) return;
+        if (!prevBtn || !nextBtn) return;
         
-        const pagination = createPagination(currentPage, totalPages, (page) => {
-            currentPage = page;
-            loadPublications();
-        });
+        // Update pagination info
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, currentPublications.length);
+        const total = currentPublications.length;
         
-        paginationContainer.appendChild(pagination);
+        if (showingStart) showingStart.textContent = start;
+        if (showingEnd) showingEnd.textContent = end;
+        if (totalItems) totalItems.textContent = total;
+        
+        // Update button states
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage >= totalPages;
+        
+        // Add event listeners
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadPublications();
+            }
+        };
+        
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadPublications();
+            }
+        };
     }
 
     /**
@@ -351,6 +568,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading publication details:', error);
             showNotification('Error loading publication details', 'error');
         }
+    }
+
+    /**
+     * Debounce function for search input
+     */
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     /**
@@ -523,77 +755,192 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * Clear all filters and search
+     */
+    function clearFilters() {
+        pubSearchInput.value = '';
+        filterTypeSelect.value = '';
+        filterYearSelect.value = '';
+        currentPage = 1;
+        loadPublications();
+    }
+
+    /**
+     * Format date for display
+     */
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        } catch (error) {
+            return dateString;
+        }
+    }
+
+    /**
      * Show publication details in modal
      * @param {string} pubId - Publication ID
      */
     async function showPublicationDetails(pubId) {
         try {
-            const publication = await fetchAPI(`${CONFIG.ENDPOINTS.PUBLICATIONS}/${pubId}`);
+            console.log('🔍 Fetching publication details for ID:', pubId);
+            
+            // Fetch publication details from the correct endpoint
+            const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PUBLICATIONS}/${pubId}`);
+            console.log('📡 Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const publication = await response.json();
+            console.log('✅ Publication data received:', publication);
+            
             const detailsContainer = document.getElementById('publication-details');
             const authorsList = document.getElementById('authors-list');
             
-            // Populate details
+            console.log('🔍 Modal elements found:', {
+                detailsContainer: !!detailsContainer,
+                authorsList: !!authorsList,
+                detailModal: !!detailModal
+            });
+            
+            if (!detailsContainer || !authorsList) {
+                console.error('❌ Modal elements not found');
+                return;
+            }
+            
+            // Populate details with enhanced styling
             detailsContainer.innerHTML = `
                 <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-indigo-800 mb-2">${publication.title}</h2>
-                    <p class="text-gray-500">${publication.publication_type} - ${formatDate(publication.publication_date)}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-indigo-800 line-clamp-2">${publication.title || 'Untitled Publication'}</h2>
+                        <span class="type-badge ${getTypeBadgeColor(publication.publication_type)}">${publication.publication_type || 'Unknown Type'}</span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-gray-600">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar mr-2 text-indigo-500"></i>
+                            <span>${formatDate(publication.publication_date)}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-quote-right mr-2 text-orange-500"></i>
+                            <span>${publication.citation_count || '0'} citations</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <p class="text-gray-700"><span class="font-medium">Journal/Source:</span> ${publication.journal_name || 'N/A'}</p>
-                        <p class="text-gray-700 mt-2"><span class="font-medium">Citation Count:</span> ${publication.citation_count || '0'}</p>
-                        ${publication.doi ? `<p class="text-gray-700 mt-2"><span class="font-medium">DOI:</span> ${publication.doi}</p>` : ''}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-3">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-gray-800 mb-2">Publication Information</h3>
+                            <div class="space-y-2">
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Journal/Source:</span> 
+                                    <span class="ml-2">${publication.journal_name || 'Not specified'}</span>
+                                </p>
+                                ${publication.doi ? `
+                                <p class="text-gray-700">
+                                    <span class="font-medium">DOI:</span> 
+                                    <span class="ml-2 font-mono text-sm">${publication.doi}</span>
+                                </p>
+                                ` : ''}
+                                ${publication.description ? `
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Description:</span> 
+                                    <span class="ml-2">${publication.description}</span>
+                                </p>
+                                ` : ''}
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        ${publication.project_id ? `
-                        <p class="text-gray-700"><span class="font-medium">Related Project:</span> 
-                            <a href="projects.html?id=${publication.project_id}" class="text-indigo-600 hover:underline">
-                                ${publication.project_title || `View Project #${publication.project_id}`}
-                            </a>
-                        </p>` : ''}
+                    
+                    <div class="space-y-3">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-gray-800 mb-2">Project Information</h3>
+                            ${publication.project_id ? `
+                            <div class="space-y-2">
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Related Project:</span> 
+                                    <a href="projects.html?id=${publication.project_id}" class="ml-2 text-indigo-600 hover:text-indigo-800 hover:underline font-medium">
+                                        ${publication.project_title || `View Project #${publication.project_id}`}
+                                    </a>
+                                </p>
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Project ID:</span> 
+                                    <span class="ml-2">${publication.project_id}</span>
+                                </p>
+                            </div>
+                            ` : '<p class="text-gray-500 italic">No related project</p>'}
+                        </div>
                     </div>
                 </div>
             `;
             
-            // Populate authors
+            // Populate authors with enhanced styling
             authorsList.innerHTML = '';
             
             if (publication.authors && publication.authors.length > 0) {
-                const authorsList = document.createElement('ul');
-                authorsList.className = 'divide-y divide-gray-200';
+                const authorsContainer = document.createElement('div');
+                authorsContainer.className = 'space-y-3';
                 
-                publication.authors.forEach(author => {
-                    const authorItem = document.createElement('li');
-                    authorItem.className = 'py-3';
+                publication.authors.forEach((author, index) => {
+                    const authorCard = document.createElement('div');
+                    authorCard.className = 'bg-white border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-colors';
                     
-                    authorItem.innerHTML = `
+                    authorCard.innerHTML = `
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-900 font-medium">${author.first_name} ${author.last_name}</p>
-                                <p class="text-gray-500 text-sm">${author.position || 'Faculty'}</p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                    <span class="text-indigo-600 font-semibold">${index + 1}</span>
+                                </div>
+                                <div>
+                                    <p class="text-gray-900 font-semibold">${author.name || 'Unknown Author'}</p>
+                                    <p class="text-gray-500 text-sm">Faculty ID: ${author.faculty_id}</p>
+                                </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-gray-500 text-sm">Order: ${author.author_order}</p>
+                                <p class="text-gray-500 text-sm mb-1">Order: ${author.author_order || index + 1}</p>
                                 ${author.is_corresponding === 'Y' ? 
-                                    '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Corresponding Author</span>' : ''}
+                                    '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">Corresponding Author</span>' : 
+                                    '<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">Co-Author</span>'}
                             </div>
                         </div>
                     `;
                     
-                    authorsList.appendChild(authorItem);
+                    authorsContainer.appendChild(authorCard);
                 });
                 
-                document.getElementById('authors-list').appendChild(authorsList);
+                authorsList.appendChild(authorsContainer);
             } else {
-                document.getElementById('authors-list').innerHTML = '<p class="text-gray-500">No authors found</p>';
+                authorsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-user-edit text-gray-300 text-4xl mb-3"></i>
+                        <p class="text-gray-500">No authors found for this publication</p>
+                        <p class="text-gray-400 text-sm">Authors information may not be available</p>
+                    </div>
+                `;
             }
             
             // Show detail modal
+            console.log('🎭 Showing detail modal...');
             detailModal.classList.remove('hidden');
+            console.log('✅ Publication details modal displayed successfully');
+            
+            // Verify modal is visible
+            setTimeout(() => {
+                const isVisible = !detailModal.classList.contains('hidden');
+                console.log('👁️ Modal visibility check:', isVisible);
+                console.log('🎭 Modal classes:', detailModal.className);
+            }, 100);
+            
         } catch (error) {
-            console.error('Error loading publication details:', error);
-            showNotification('Error loading publication details', 'error');
+            console.error('❌ Error loading publication details:', error);
+            showNotification('Error loading publication details. Please try again.', 'error');
         }
     }
 });

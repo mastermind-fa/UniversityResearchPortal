@@ -25,7 +25,13 @@ app.add_middleware(
 # Create tables on startup
 @app.on_event("startup")
 async def startup():
-    create_tables()
+    try:
+        create_tables()
+        print("✅ Database tables created successfully")
+    except Exception as e:
+        print(f"❌ Error creating tables: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Include API routes
 app.include_router(departments.router, prefix="/api", tags=["departments"])

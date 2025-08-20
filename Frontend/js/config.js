@@ -7,43 +7,46 @@ const CONFIG = {
     // API endpoints
     ENDPOINTS: {
         // Departments
-        DEPARTMENTS: '/departments',
+        DEPARTMENTS: '/api/departments/',
         
         // Faculty
-        FACULTY: '/faculty',
-        FACULTY_SEARCH: '/faculty/search',
+        FACULTY: '/api/faculty/',
+        FACULTY_SEARCH: '/api/faculty/search',
         
         // Students
-        STUDENTS: '/students',
-        STUDENTS_BY_ADVISOR: '/students/by-advisor',
+        STUDENTS: '/api/students/',
+        STUDENTS_BY_ADVISOR: '/api/students/by-advisor',
         
         // Projects
-        PROJECTS: '/projects',
-        ACTIVE_PROJECTS: '/projects/active',
-        PROJECTS_BY_DEPARTMENT: '/projects/by-department',
+        PROJECTS: '/api/projects/',
+        ACTIVE_PROJECTS: '/api/projects/active',
+        PROJECTS_BY_DEPARTMENT: '/api/projects/by-department',
         
         // Publications
-        PUBLICATIONS: '/publications',
+        PUBLICATIONS: '/api/publications',
         
         // Funding
-        FUNDING_SOURCES: '/funding-sources',
-        PROJECT_FUNDING: '/project-funding',
+        FUNDING_SOURCES: '/api/funding-sources/',
+        PROJECT_FUNDING: '/api/project-funding',
+        FUNDING_SUMMARY: '/api/funding-sources/summary',
         
         // Student Research
-        STUDENT_RESEARCH: '/student-research',
+        STUDENT_RESEARCH: '/api/student-research/',
         
         // Project Collaborators
-        PROJECT_COLLABORATORS: '/project-collaborators',
+        PROJECT_COLLABORATORS: '/api/project-collaborators/',
         
         // Analytics
-        ANALYTICS_DASHBOARD: '/analytics/dashboard',
-        ANALYTICS_DEPARTMENT: '/analytics/department',
+        ANALYTICS_DASHBOARD: '/api/analytics/dashboard',
+        ANALYTICS_DEPARTMENT: '/api/analytics/department',
+        ANALYTICS_PUBLICATIONS_BY_DEPT: '/api/analytics/publications-by-department',
+        ANALYTICS_FUNDING_TRENDS: '/api/analytics/funding-trends',
         
         // Reports
-        REPORTS_FACULTY: '/reports/faculty',
-        REPORTS_PROJECTS: '/reports/projects',
-        REPORTS_PUBLICATIONS: '/reports/publications',
-        REPORTS_FUNDING: '/reports/funding'
+        REPORTS_FACULTY: '/api/reports/faculty',
+        REPORTS_PROJECTS: '/api/reports/projects',
+        REPORTS_PUBLICATIONS: '/api/reports/publications',
+        REPORTS_FUNDING: '/api/reports/funding'
     },
     
     // Chart colors

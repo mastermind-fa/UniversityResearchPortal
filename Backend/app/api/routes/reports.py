@@ -36,12 +36,6 @@ def get_faculty_reports(
     
     result = []
     for faculty in faculty_list:
-        # Count projects for this faculty member
-        project_count = len(faculty.projects)
-        
-        # Count active projects
-        active_projects = sum(1 for p in faculty.projects if p.is_active)
-        
         # Count advisees
         advisee_count = len(faculty.advisees)
         
@@ -53,8 +47,6 @@ def get_faculty_reports(
             "department": faculty.department.dept_name if faculty.department else None,
             "hire_date": faculty.hire_date,
             "research_interests": faculty.research_interests,
-            "project_count": project_count,
-            "active_projects": active_projects,
             "advisee_count": advisee_count
         }
         result.append(faculty_data)
@@ -82,7 +74,7 @@ def get_faculty_reports(
 @router.get("/projects")
 def get_project_reports(
     dept_id: int = None,
-    is_active: bool = None,
+    status: str = None,
     db: Session = Depends(get_db)
 ):
     """Generate project reports with optional filters"""
@@ -90,40 +82,28 @@ def get_project_reports(
     
     if dept_id:
         query = query.filter(Project.dept_id == dept_id)
-    if is_active is not None:
-        query = query.filter(Project.is_active == is_active)
+    if status:
+        query = query.filter(Project.status == status)
     
-    # Eager load relationships
-    query = query.options(
-        joinedload(Project.department),
-        joinedload(Project.faculty_members),
-        joinedload(Project.students)
-    )
-    
+    # Get projects
     projects = query.all()
     
     result = []
     for project in projects:
         project_data = {
             "project_id": project.project_id,
-            "title": project.title,
+            "title": project.project_title,
             "description": project.description,
-            "department": project.department.dept_name if project.department else None,
             "start_date": project.start_date,
             "end_date": project.end_date,
-            "is_active": project.is_active,
-            "budget": project.budget,
-            "funding_source": project.funding_source,
-            "faculty_count": len(project.faculty_members),
-            "student_count": len(project.students),
-            "faculty": [{"id": f.faculty_id, "name": f"{f.first_name} {f.last_name}"} for f in project.faculty_members],
-            "students": [{"id": s.student_id, "name": f"{s.first_name} {s.last_name}"} for s in project.students]
+            "status": project.status,
+            "budget": project.budget
         }
         result.append(project_data)
     
     # Summary statistics
     total_budget = sum(p.budget or 0 for p in projects)
-    active_count = sum(1 for p in projects if p.is_active)
+    active_count = sum(1 for p in projects if p.status == 'Active')
     
     summary = {
         "total_projects": len(projects),

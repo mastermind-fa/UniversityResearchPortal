@@ -12,6 +12,75 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <style>
+        /* Reports page specific styles */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Gradient text effects */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Enhanced button animations */
+        .btn-animate {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-animate:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Loading animation enhancement */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .loading-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+        
+        /* Chart container improvements */
+        .chart-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Report card improvements */
+        .report-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .report-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
         <!-- Navigation Header -->
@@ -179,155 +248,212 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-indigo-800 mb-6">Research Reports</h1>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-8 lg:mb-12">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-indigo-800 mb-4">Research Reports & Analytics</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Generate comprehensive reports and insights across all research activities, faculty performance, and institutional metrics</p>
+        </div>
         
-        <!-- Report Types -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <button id="faculty-report-btn" class="bg-white p-6 rounded-lg shadow-md text-center card-hover">
-                <i class="fas fa-user-tie text-indigo-600 text-4xl mb-4"></i>
-                <h2 class="text-xl font-semibold text-indigo-800 mb-2">Faculty Report</h2>
-                <p class="text-gray-600">Research activity and projects by faculty member</p>
+        <!-- Report Types Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 lg:mb-12">
+            <!-- Faculty Report Card -->
+            <button id="faculty-report-btn" class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                <div class="p-6 sm:p-8 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-user-tie text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-bold text-indigo-800 mb-3">Faculty Research Report</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">Comprehensive analysis of faculty research activities, projects, and student mentorship</p>
+                </div>
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-3 border-t border-gray-100">
+                    <span class="text-sm font-medium text-indigo-700">Generate Report →</span>
+                </div>
             </button>
-            <button id="projects-report-btn" class="bg-white p-6 rounded-lg shadow-md text-center card-hover">
-                <i class="fas fa-flask text-indigo-600 text-4xl mb-4"></i>
-                <h2 class="text-xl font-semibold text-indigo-800 mb-2">Projects Report</h2>
-                <p class="text-gray-600">Research projects summary and statistics</p>
+
+            <!-- Projects Report Card -->
+            <button id="projects-report-btn" class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                <div class="p-6 sm:p-8 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-flask text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-bold text-green-800 mb-3">Research Projects Report</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">Detailed overview of research projects, status tracking, and budget allocation analysis</p>
+                </div>
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-3 border-t border-gray-100">
+                    <span class="text-sm font-medium text-green-700">Generate Report →</span>
+                </div>
             </button>
-            <button id="publications-report-btn" class="bg-white p-6 rounded-lg shadow-md text-center card-hover">
-                <i class="fas fa-book text-indigo-600 text-4xl mb-4"></i>
-                <h2 class="text-xl font-semibold text-indigo-800 mb-2">Publications Report</h2>
-                <p class="text-gray-600">Research publications by department</p>
+
+            <!-- Publications Report Card -->
+            <button id="publications-report-btn" class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                <div class="p-6 sm:p-8 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-book text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-bold text-blue-800 mb-3">Publications Report</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">Academic publication metrics, citation analysis, and research output by department</p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-3 border-t border-gray-100">
+                    <span class="text-sm font-medium text-blue-700">Generate Report →</span>
+                </div>
             </button>
-            <button id="funding-report-btn" class="bg-white p-6 rounded-lg shadow-md text-center card-hover">
-                <i class="fas fa-dollar-sign text-indigo-600 text-4xl mb-4"></i>
-                <h2 class="text-xl font-semibold text-indigo-800 mb-2">Funding Report</h2>
-                <p class="text-gray-600">Research funding and allocations</p>
+
+            <!-- Funding Report Card -->
+            <button id="funding-report-btn" class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                <div class="p-6 sm:p-8 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-dollar-sign text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-bold text-orange-800 mb-3">Funding Report</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">Research funding analysis, grant distribution, and financial performance metrics</p>
+                </div>
+                <div class="bg-gradient-to-r from-orange-50 to-red-50 px-6 py-3 border-t border-gray-100">
+                    <span class="text-sm font-medium text-orange-700">Generate Report →</span>
+                </div>
             </button>
         </div>
 
         <!-- Report Filters -->
-        <div id="report-filters" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden">
-            <h3 class="text-lg font-semibold text-indigo-800 mb-4" id="filter-title">Report Filters</h3>
-            
-            <!-- Faculty Report Filters -->
-            <div id="faculty-filters" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">Select Faculty Member</label>
-                        <select id="faculty-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                            <option value="">Select Faculty Member</option>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button id="generate-faculty-report" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
-                            Generate Report
-                        </button>
-                    </div>
-                </div>
+        <div id="report-filters" class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6 lg:mb-8 hidden">
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4 rounded-t-2xl border-b border-gray-100">
+                <h3 class="text-xl font-bold text-indigo-800 flex items-center" id="filter-title">
+                    <i class="fas fa-filter mr-3 text-indigo-600"></i>
+                    Report Filters
+                </h3>
             </div>
             
-            <!-- Projects Report Filters -->
-            <div id="projects-filters" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">Department</label>
-                        <select id="dept-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                            <option value="">All Departments</option>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 mb-2">Status</label>
-                        <select id="status-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                            <option value="">All Status</option>
-                            <option value="true">Active</option>
-                            <option value="false">Completed</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button id="generate-projects-report" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
-                            Generate Report
-                        </button>
+            <div class="p-6">
+                <!-- Faculty Report Filters -->
+                <div id="faculty-filters" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Select Faculty Member</label>
+                            <select id="faculty-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white">
+                                <option value="">Choose a faculty member...</option>
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2 flex items-end space-x-4">
+                            <button id="generate-faculty-report" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-chart-line mr-2"></i> Generate Faculty Report
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Publications Report Filters -->
-            <div id="publications-filters" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">Department</label>
-                        <select id="pub-dept-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                            <option value="">All Departments</option>
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button id="generate-publications-report" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
-                            Generate Report
-                        </button>
+                
+                <!-- Projects Report Filters -->
+                <div id="projects-filters" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+                            <select id="dept-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white">
+                                <option value="">All Departments</option>
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Project Status</label>
+                            <select id="status-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white">
+                                <option value="">All Status</option>
+                                <option value="true">Active Projects</option>
+                                <option value="false">Completed Projects</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2 flex items-end">
+                            <button id="generate-projects-report" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-chart-bar mr-2"></i> Generate Projects Report
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Funding Report Filters -->
-            <div id="funding-filters" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">Funding Source Type</label>
-                        <select id="funding-type-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                            <option value="">All Types</option>
-                            <option value="Government">Government</option>
-                            <option value="Private">Private</option>
-                            <option value="University">University</option>
-                            <option value="International">International</option>
-                        </select>
+                
+                <!-- Publications Report Filters -->
+                <div id="publications-filters" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+                            <select id="pub-dept-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white">
+                                <option value="">All Departments</option>
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2 flex items-end">
+                            <button id="generate-publications-report" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-chart-area mr-2"></i> Generate Publications Report
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-end">
-                        <button id="generate-funding-report" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg">
-                            Generate Report
-                        </button>
+                </div>
+                
+                <!-- Funding Report Filters -->
+                <div id="funding-filters" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Funding Source Type</label>
+                            <select id="funding-type-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white">
+                                <option value="">All Funding Sources</option>
+                                <option value="Government">Government Grants</option>
+                                <option value="Private">Private Foundation</option>
+                                <option value="University">University Internal</option>
+                                <option value="International">International Funding</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2 flex items-end">
+                            <button id="generate-funding-report" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-chart-pie mr-2"></i> Generate Funding Report
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="hidden text-center py-10">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-            <p class="mt-2 text-indigo-600">Generating report...</p>
+        <div id="loading" class="hidden text-center py-12 lg:py-16">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-500 mb-4"></div>
+            <h3 class="text-xl font-semibold text-indigo-800 mb-2">Generating Your Report</h3>
+            <p class="text-gray-600">Please wait while we compile the data and create your comprehensive report...</p>
         </div>
 
         <!-- Report Content -->
-        <div id="report-content" class="hidden bg-white rounded-lg shadow-md">
+        <div id="report-content" class="hidden bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <!-- Report header -->
-            <div class="border-b p-6">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 id="report-title" class="text-2xl font-bold text-indigo-800">Report Title</h2>
-                        <p id="report-subtitle" class="text-gray-600 mt-1">Report Subtitle</p>
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-6 border-b border-gray-100">
+                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                    <div class="flex-1">
+                        <h2 id="report-title" class="text-2xl lg:text-3xl font-bold text-indigo-800 mb-2">Report Title</h2>
+                        <p id="report-subtitle" class="text-lg text-gray-600">Report Subtitle</p>
                     </div>
-                    <div>
-                        <button id="export-report" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg flex items-center">
-                            <i class="fas fa-download mr-2"></i> Export
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button id="export-report" class="bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 py-3 px-6 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i> Export Report
                         </button>
                     </div>
                 </div>
             </div>
             
             <!-- Report body (will be populated by JS) -->
-            <div id="report-body" class="p-6">
+            <div id="report-body" class="p-6 lg:p-8">
                 <!-- Content depends on report type -->
             </div>
         </div>
         
         <!-- No Data Message -->
-        <div id="no-data" class="hidden text-center py-10 bg-white rounded-lg shadow-md">
-            <i class="fas fa-chart-bar text-indigo-300 text-5xl mb-4"></i>
-            <p class="text-xl text-gray-600">No report data available</p>
-            <p class="text-gray-500">Try adjusting your filters or selecting a different report type</p>
+        <div id="no-data" class="hidden text-center py-12 lg:py-16 bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-chart-bar text-indigo-400 text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">No Report Data Available</h3>
+            <p class="text-gray-600 mb-4 max-w-md mx-auto">We couldn't find any data matching your current filters or the selected report type.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="document.getElementById('report-filters').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200">
+                    <i class="fas fa-filter mr-2"></i> Adjust Filters
+                </button>
+                <button onclick="location.reload()" class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-200">
+                    <i class="fas fa-redo mr-2"></i> Try Again
+                </button>
+            </div>
         </div>
     </div>    <!-- Footer -->
     <footer class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 text-white">

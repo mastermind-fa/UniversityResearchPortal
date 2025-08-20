@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const departmentFilter = document.getElementById('department-filter');
     const statusFilter = document.getElementById('status-filter');
     const searchBtn = document.getElementById('search-btn');
+    const resultsCountEl = document.getElementById('results-count');
+    
+    // Statistics elements
+    const totalProjectsCount = document.getElementById('total-projects-count');
+    const activeProjectsCount = document.getElementById('active-projects-count');
+    const totalBudgetAmount = document.getElementById('total-budget-amount');
+    const departmentsCount = document.getElementById('departments-count');
     
     // Pagination
     const paginationSection = document.getElementById('pagination');
@@ -56,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let itemsPerPage = CONFIG.PAGINATION.ITEMS_PER_PAGE;
     
     // Initialize page
+    console.log('🚀 Projects page script loaded!');
+    console.log('🔧 CONFIG:', CONFIG);
+    console.log('🌐 API Base URL:', CONFIG.API_BASE_URL);
+    console.log('📋 Projects endpoint:', CONFIG.ENDPOINTS.PROJECTS);
+    
     initPage();
 
     // Search and filter functionality
@@ -119,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         await loadProjects();
+        await loadStatistics();
     }
 
     function populateDepartmentFilters() {
@@ -248,34 +261,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function loadProjects() {
+        console.log('🔍 Starting to load projects...');
+        
         // Show loading
-        projectsGrid.classList.add('hidden');
-        paginationSection.classList.add('hidden');
-        noProjectsMessage.classList.add('hidden');
-        loadingIndicator.classList.remove('hidden');
+        if (projectsGrid) projectsGrid.classList.add('hidden');
+        if (paginationSection) paginationSection.classList.add('hidden');
+        if (noProjectsMessage) noProjectsMessage.classList.add('hidden');
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
         
         try {
-            // Fetch projects
-            allProjects = await fetchAPI(CONFIG.ENDPOINTS.PROJECTS);
+            // Fetch projects from backend API
+            const apiUrl = CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.PROJECTS;
+            console.log('🌐 Fetching from:', apiUrl);
+            
+            const response = await fetch(apiUrl);
+            console.log('📡 Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            allProjects = await response.json();
+            console.log('✅ Loaded projects:', allProjects);
+            console.log('📊 Total projects found:', allProjects.length);
             
             // Apply initial filtering
             filterProjects();
         } catch (error) {
-            console.error('Error loading projects:', error);
+            console.error('❌ Error loading projects:', error);
             showNotification('Failed to load research projects', 'error');
-            noProjectsMessage.classList.remove('hidden');
+            if (noProjectsMessage) noProjectsMessage.classList.remove('hidden');
         } finally {
-            loadingIndicator.classList.add('hidden');
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        }
+    }
+
+    async function loadStatistics() {
+        try {
+            if (allProjects.length > 0) {
+                // Calculate statistics
+                const totalProjects = allProjects.length;
+                const activeProjects = allProjects.filter(p => p.status === 'Active').length;
+                const totalBudget = allProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+                const uniqueDepartments = new Set(allProjects.map(p => p.dept_id)).size;
+                
+                // Update statistics display
+                if (totalProjectsCount) totalProjectsCount.textContent = totalProjects;
+                if (activeProjectsCount) activeProjectsCount.textContent = activeProjects;
+                if (totalBudgetAmount) totalBudgetAmount.textContent = formatCurrency(totalBudget);
+                if (departmentsCount) departmentsCount.textContent = uniqueDepartments;
+                
+                console.log('Statistics loaded:', { totalProjects, activeProjects, totalBudget, uniqueDepartments });
+            }
+        } catch (error) {
+            console.error('Error loading statistics:', error);
         }
     }
 
     function filterProjects() {
-        const searchTerm = projectSearchInput.value.trim().toLowerCase();
-        const deptId = departmentFilter.value ? parseInt(departmentFilter.value) : null;
-        const status = statusFilter.value === '' ? null : statusFilter.value === 'true';
+        console.log('🔍 Filtering projects...');
+        console.log('📊 All projects:', allProjects);
+        
+        const searchTerm = projectSearchInput ? projectSearchInput.value.trim().toLowerCase() : '';
+        const deptId = departmentFilter && departmentFilter.value ? parseInt(departmentFilter.value) : null;
+        const status = statusFilter && statusFilter.value ? statusFilter.value : '';
+        
+        console.log('🔍 Search term:', searchTerm);
+        console.log('🏢 Department filter:', deptId);
+        console.log('📋 Status filter:', status);
         
         filteredProjects = allProjects.filter(project => {
-            const title = project.title.toLowerCase();
+            const title = project.project_title ? project.project_title.toLowerCase() : '';
             const description = project.description ? project.description.toLowerCase() : '';
             
             const matchesSearch = !searchTerm || 
@@ -283,51 +339,87 @@ document.addEventListener('DOMContentLoaded', function() {
                 description.includes(searchTerm);
             
             const matchesDepartment = !deptId || project.dept_id === deptId;
-            const matchesStatus = status === null || project.is_active === status;
+            const matchesStatus = !status || project.status === status;
             
             return matchesSearch && matchesDepartment && matchesStatus;
         });
         
+        console.log('✅ Filtered projects:', filteredProjects);
+        console.log('📊 Filtered count:', filteredProjects.length);
+        
+        updateResultsCount();
         renderProjects();
     }
 
-    function renderProjects() {
+    function updateResultsCount() {
+        if (resultsCountEl) {
+            if (filteredProjects.length === allProjects.length) {
+                resultsCountEl.textContent = 'Showing all projects';
+            } else {
+                resultsCountEl.textContent = `Showing ${filteredProjects.length} of ${allProjects.length} projects`;
+            }
+        }
+    }
+
+        async function renderProjects() {
+        console.log('🎨 Starting to render projects...');
+        console.log('📊 Projects grid element:', projectsGrid);
+        
         // Clear existing projects
-        projectsGrid.innerHTML = '';
+        const gridContainer = projectsGrid.querySelector('.projects-grid');
+        console.log('🔍 Grid container found:', gridContainer);
+        
+        if (gridContainer) {
+            gridContainer.innerHTML = '';
+        }
         
         if (filteredProjects.length === 0) {
+            console.log('❌ No projects to display');
             projectsGrid.classList.add('hidden');
             paginationSection.classList.add('hidden');
             noProjectsMessage.classList.remove('hidden');
             return;
         }
         
+        console.log('✅ Rendering projects...');
+        
         // Calculate pagination
         const start = (currentPage - 1) * itemsPerPage;
         const end = Math.min(start + itemsPerPage, filteredProjects.length);
         const pageData = filteredProjects.slice(start, end);
         
+        console.log('📄 Page data:', pageData);
+        
         // Update pagination UI
-        showingStart.textContent = start + 1;
-        showingEnd.textContent = end;
-        totalItems.textContent = filteredProjects.length;
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = end >= filteredProjects.length;
+        if (showingStart) showingStart.textContent = start + 1;
+        if (showingEnd) showingEnd.textContent = end;
+        if (totalItems) totalItems.textContent = filteredProjects.length;
+        if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+        if (nextPageBtn) nextPageBtn.disabled = end >= filteredProjects.length;
         
         // Render each project
-        pageData.forEach(project => {
+        for (const project of pageData) {
+            console.log('🎯 Rendering project:', project);
             const departmentName = getDepartmentName(project.dept_id);
-            const facultyCount = project.faculty_members ? project.faculty_members.length : 0;
-            const studentCount = project.students ? project.students.length : 0;
+            
+            // Fetch actual collaborator counts
+            const [facultyCount, studentCount] = await Promise.all([
+                getProjectFacultyCount(project.project_id),
+                getProjectStudentCount(project.project_id)
+            ]);
             
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md p-6 card-hover';
+            card.className = 'bg-white rounded-xl shadow-lg p-6 border border-gray-200 project-card';
             
             card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <h2 class="text-xl font-semibold text-indigo-800 mb-2">${project.title}</h2>
-                    <span class="badge ${project.is_active ? 'badge-success' : 'badge-info'}">
-                        ${project.is_active ? 'Active' : 'Completed'}
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-bold text-indigo-800 line-clamp-2">${project.project_title || 'Untitled Project'}</h3>
+                    <span class="status-badge ${
+                        project.status === 'Active' ? 'bg-green-100 text-green-700' : 
+                        project.status === 'Completed' ? 'bg-blue-100 text-blue-700' : 
+                        'bg-gray-100 text-gray-700'
+                    }">
+                        ${project.status || 'Unknown'}
                     </span>
                 </div>
                 
@@ -335,67 +427,128 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${project.description || 'No description provided'}
                 </p>
                 
-                <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
-                    <div>
-                        <span class="text-gray-500">Department:</span> 
-                        ${departmentName}
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-building text-indigo-500 mr-2 w-4"></i>
+                        <span class="text-gray-600">${departmentName}</span>
                     </div>
-                    <div>
-                        <span class="text-gray-500">Dates:</span> 
-                        ${formatDate(project.start_date)} - ${project.end_date ? formatDate(project.end_date) : 'Present'}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar text-indigo-500 mr-2 w-4"></i>
+                        <span class="text-gray-600">${formatDate(project.start_date)} - ${project.end_date ? formatDate(project.end_date) : 'Present'}</span>
                     </div>
                     ${project.budget ? `
-                        <div>
-                            <span class="text-gray-500">Budget:</span> 
-                            ${formatCurrency(project.budget)}
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-dollar-sign text-indigo-500 mr-2 w-4"></i>
+                            <span class="text-gray-600">${formatCurrency(project.budget)}</span>
+                        </div>
+                    ` : ''}
+                    ${project.principal_investigator_id ? `
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-user-tie text-indigo-500 mr-2 w-4"></i>
+                            <span class="text-gray-600">PI: ${getFacultyName(project.principal_investigator_id)}</span>
                         </div>
                     ` : ''}
                 </div>
                 
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center pt-4 border-t border-gray-100">
                     <div class="flex items-center space-x-4">
-                        <div class="flex items-center">
-                            <i class="fas fa-user-tie text-indigo-600 mr-1"></i>
-                            <span>${facultyCount}</span>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-user-tie text-indigo-600 mr-2"></i>
+                            <span class="font-medium text-indigo-700">${facultyCount}</span>
                         </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-user-graduate text-indigo-600 mr-1"></i>
-                            <span>${studentCount}</span>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-user-graduate text-green-600 mr-2"></i>
+                            <span class="text-green-700">${studentCount}</span>
                         </div>
                     </div>
                     
                     <div class="flex space-x-2">
-                        <button class="view-btn text-indigo-600 hover:text-indigo-800 p-1" 
+                        <button class="view-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-2 rounded-lg transition-colors" 
                             title="View Details" data-id="${project.project_id}">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-eye mr-1"></i>View
                         </button>
-                        <button class="edit-btn text-gray-600 hover:text-gray-800 p-1" 
+                        <button class="edit-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors" 
                             title="Edit Project" data-id="${project.project_id}">
-                            <i class="fas fa-edit"></i>
+                            <i class="fas fa-edit mr-1"></i>Edit
                         </button>
-                        <button class="delete-btn text-red-600 hover:text-red-800 p-1" 
+                        <button class="delete-btn bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg transition-colors" 
                             title="Delete Project" data-id="${project.project_id}">
-                            <i class="fas fa-trash-alt"></i>
+                            <i class="fas fa-trash-alt mr-1"></i>Delete
                         </button>
                     </div>
                 </div>
             `;
             
-            projectsGrid.appendChild(card);
+            if (gridContainer) {
+                gridContainer.appendChild(card);
+                console.log('✅ Card added to grid');
+            } else {
+                console.log('❌ Grid container not found');
+            }
             
             // Action buttons
             card.querySelector('.view-btn').addEventListener('click', () => viewProject(project.project_id));
             card.querySelector('.edit-btn').addEventListener('click', () => showEditProjectModal(project.project_id));
             card.querySelector('.delete-btn').addEventListener('click', () => showDeleteConfirmation(project.project_id));
-        });
+        }
         
         projectsGrid.classList.remove('hidden');
         paginationSection.classList.remove('hidden');
+        console.log('✅ Projects rendering complete');
     }
 
     function getDepartmentName(deptId) {
         const department = departments.find(dept => dept.dept_id === deptId);
         return department ? department.dept_name : 'Unknown Department';
+    }
+
+    function getFacultyName(facultyId) {
+        const facultyMember = faculty.find(f => f.faculty_id === facultyId);
+        return facultyMember ? `${facultyMember.first_name} ${facultyMember.last_name}` : 'Unknown Faculty';
+    }
+
+    async function getProjectFacultyCount(projectId) {
+        try {
+            const url = `${CONFIG.API_BASE_URL}/project-collaborators/?project_id=${projectId}`;
+            console.log(`🔍 Fetching faculty collaborators from: ${url}`);
+            
+            const response = await fetch(url);
+            console.log(`📡 Faculty response status: ${response.status}`);
+            
+            if (response.ok) {
+                const collaborators = await response.json();
+                console.log(`👥 Faculty collaborators for project ${projectId}:`, collaborators);
+                console.log(`📊 Faculty count: ${collaborators.length}`);
+                return collaborators.length;
+            }
+            console.log(`❌ Faculty response not ok: ${response.status}`);
+            return 0;
+        } catch (error) {
+            console.error('❌ Error fetching faculty collaborators:', error);
+            return 0;
+        }
+    }
+
+    async function getProjectStudentCount(projectId) {
+        try {
+            const url = `${CONFIG.API_BASE_URL}/student-research/?project_id=${projectId}`;
+            console.log(`🔍 Fetching student researchers from: ${url}`);
+            
+            const response = await fetch(url);
+            console.log(`📡 Student response status: ${response.status}`);
+            
+            if (response.ok) {
+                const students = await response.json();
+                console.log(`👥 Student researchers for project ${projectId}:`, students);
+                console.log(`📊 Student count: ${students.length}`);
+                return students.length;
+            }
+            console.log(`❌ Student response not ok: ${response.status}`);
+            return 0;
+        } catch (error) {
+            console.error('❌ Error fetching student researchers:', error);
+            return 0;
+        }
     }
 
     function showAddProjectModal() {
@@ -550,9 +703,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const projectDetails = document.getElementById('project-details');
         projectDetails.innerHTML = `
             <h2 class="text-2xl font-bold text-indigo-800 mb-4">
-                ${project.title}
-                <span class="ml-2 badge ${project.is_active ? 'badge-success' : 'badge-info'}">
-                    ${project.is_active ? 'Active' : 'Completed'}
+                ${project.project_title || 'Untitled Project'}
+                <span class="ml-2 status-badge ${
+                    project.status === 'Active' ? 'bg-green-100 text-green-700' : 
+                    project.status === 'Completed' ? 'bg-blue-100 text-blue-700' : 
+                    'bg-gray-100 text-gray-700'
+                }">
+                    ${project.status || 'Unknown'}
                 </span>
             </h2>
             
@@ -579,8 +736,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="text-gray-800 font-medium">${project.budget ? formatCurrency(project.budget) : 'Not specified'}</p>
                 </div>
                 <div>
-                    <p class="text-gray-500 text-sm">Funding Source</p>
-                    <p class="text-gray-800 font-medium">${project.funding_source || 'Not specified'}</p>
+                    <p class="text-gray-500 text-sm">Principal Investigator</p>
+                    <p class="text-gray-800 font-medium">${project.principal_investigator_id ? getFacultyName(project.principal_investigator_id) : 'Not specified'}</p>
                 </div>
             </div>
         `;
@@ -620,5 +777,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         detailModal.classList.remove('hidden');
+    }
+
+    // Utility functions
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        } catch (error) {
+            return dateString;
+        }
+    }
+
+    function formatCurrency(amount) {
+        if (!amount) return 'N/A';
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        } catch (error) {
+            return `$${amount}`;
+        }
     }
 });

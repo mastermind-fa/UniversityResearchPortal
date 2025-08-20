@@ -2,407 +2,340 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
-    const departmentsList = document.getElementById('departments-list');
-    const loadingIndicator = document.getElementById('loading');
-    const noDepartmentsMessage = document.getElementById('no-departments');
+    const departmentsList = document.getElementById('departments-table-body');
+    const totalDepartmentsEl = document.getElementById('total-departments');
+    const totalFacultyEl = document.getElementById('total-faculty');
+    const avgBudgetEl = document.getElementById('avg-budget');
+    const oldestYearEl = document.getElementById('oldest-year');
     const addDepartmentBtn = document.getElementById('add-department-btn');
     const departmentModal = document.getElementById('department-modal');
     const modalTitle = document.getElementById('modal-title');
     const departmentForm = document.getElementById('department-form');
-    const closeModalBtn = document.getElementById('close-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
-    const deleteModal = document.getElementById('delete-modal');
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const detailModal = document.getElementById('detail-modal');
-    const closeDetailBtn = document.getElementById('close-detail-btn');
-    const closeDetailsBtn = document.getElementById('close-details-btn');
+    const searchInput = document.getElementById('search-input');
+    const sortSelect = document.getElementById('sort-select');
+    const resultsCountEl = document.getElementById('results-count');
     
-    const deptSearchInput = document.getElementById('dept-search');
-    const filterYearSelect = document.getElementById('filter-year');
-    const searchBtn = document.getElementById('search-btn');
-
-    // Form fields
-    const deptIdInput = document.getElementById('dept-id');
-    const deptNameInput = document.getElementById('dept-name');
-    const deptHeadInput = document.getElementById('dept-head');
-    const researchFocusInput = document.getElementById('research-focus');
-    const establishedYearInput = document.getElementById('established-year');
-    const budgetInput = document.getElementById('budget');
-
     // State variables
     let currentDepartments = [];
-    let currentDepartmentId = null;
+    let filteredDepartments = [];
     
     // Initialize page
     initPage();
 
-    // Search and filter functionality
-    searchBtn.addEventListener('click', loadDepartments);
+    // Event listeners
+    if (addDepartmentBtn) addDepartmentBtn.addEventListener('click', showAddDepartmentModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (departmentForm) departmentForm.addEventListener('submit', saveDepartment);
+    if (searchInput) searchInput.addEventListener('input', handleSearch);
+    if (sortSelect) sortSelect.addEventListener('change', handleSort);
 
-    // Modal events
-    addDepartmentBtn.addEventListener('click', showAddDepartmentModal);
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    departmentForm.addEventListener('submit', saveDepartment);
-    
-    cancelDeleteBtn.addEventListener('click', () => {
-        deleteModal.classList.add('hidden');
-    });
-    
-    closeDetailBtn.addEventListener('click', () => {
-        detailModal.classList.add('hidden');
-    });
-    
-    closeDetailsBtn.addEventListener('click', () => {
-        detailModal.classList.add('hidden');
-    });
-
-    async function initPage() {
-        await loadDepartments();
-        populateYearFilter();
-    }
-
-    function populateYearFilter() {
-        // Get unique years from departments
-        const years = [...new Set(currentDepartments
-            .map(dept => dept.established_year)
-            .filter(year => year !== null && year !== undefined))]
-            .sort((a, b) => a - b);
-        
-        // Clear existing options except the first one
-        while (filterYearSelect.options.length > 1) {
-            filterYearSelect.remove(1);
-        }
-        
-        // Add year options
-        years.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            filterYearSelect.appendChild(option);
-        });
+    function initPage() {
+        loadDepartments();
     }
 
     async function loadDepartments() {
-        // Show loading
-        departmentsList.classList.add('hidden');
-        noDepartmentsMessage.classList.add('hidden');
-        loadingIndicator.classList.remove('hidden');
-        
         try {
-            // Build query parameters
-            const params = new URLSearchParams();
+            console.log('🔄 Loading departments...');
             
-            const searchTerm = deptSearchInput.value.trim();
-            if (searchTerm) {
-                params.append('dept_name', searchTerm);
+            // Show loading state
+            showLoadingState();
+            
+            // Fetch departments from backend API
+            const response = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.DEPARTMENTS);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const year = filterYearSelect.value;
-            if (year) {
-                params.append('established_year', year);
-            }
+            currentDepartments = await response.json();
+            console.log('📊 Loaded departments:', currentDepartments);
             
-            // Fetch departments
-            let endpoint = CONFIG.ENDPOINTS.DEPARTMENTS;
-            if (params.toString()) {
-                endpoint += `?${params.toString()}`;
-            }
-            
-            currentDepartments = await fetchAPI(endpoint);
+            filteredDepartments = [...currentDepartments];
             renderDepartments();
+            loadStatistics();
         } catch (error) {
-            console.error('Error loading departments:', error);
-            showNotification('Failed to load departments', 'error');
-            noDepartmentsMessage.classList.remove('hidden');
-        } finally {
-            loadingIndicator.classList.add('hidden');
+            console.error('❌ Error loading departments:', error);
+            if (typeof showNotification === 'function') {
+                showNotification('Failed to load departments', 'error');
+            }
+            // Show error state
+            if (departmentsList) {
+                departmentsList.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-red-500">
+                            <div class="flex flex-col items-center space-y-2">
+                                <i class="fas fa-exclamation-triangle text-4xl text-red-300"></i>
+                                <p class="text-lg font-medium">Error loading departments</p>
+                                <p class="text-sm text-red-400">Please try refreshing the page</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
         }
     }
 
     function renderDepartments() {
         // Clear existing departments
+        if (!departmentsList) return;
         departmentsList.innerHTML = '';
         
-        if (currentDepartments.length === 0) {
-            noDepartmentsMessage.classList.remove('hidden');
+        if (!filteredDepartments || filteredDepartments.length === 0) {
+            departmentsList.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 empty-state">
+                        <div class="flex flex-col items-center space-y-2">
+                            <i class="fas fa-building text-4xl text-gray-300"></i>
+                            <p class="text-lg font-medium">No departments found</p>
+                            <p class="text-sm text-gray-400">Try adjusting your search or filters</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
             return;
         }
         
         // Render each department
-        currentDepartments.forEach(dept => {
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md p-6 card-hover';
+        filteredDepartments.forEach(dept => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors duration-200';
             
-            card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <h2 class="text-xl font-semibold text-indigo-800">${dept.dept_name}</h2>
-                    <div class="dropdown relative">
-                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <div class="dropdown-menu hidden absolute right-0 mt-2 bg-white rounded-lg shadow-lg z-10 w-32">
-                            <button class="view-btn block w-full text-left px-4 py-2 hover:bg-gray-100" data-id="${dept.dept_id}">
-                                <i class="fas fa-eye mr-2"></i> View
-                            </button>
-                            <button class="edit-btn block w-full text-left px-4 py-2 hover:bg-gray-100" data-id="${dept.dept_id}">
-                                <i class="fas fa-edit mr-2"></i> Edit
-                            </button>
-                            <button class="delete-btn block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600" data-id="${dept.dept_id}">
-                                <i class="fas fa-trash mr-2"></i> Delete
-                            </button>
+            row.innerHTML = `
+                <td class="px-6 py-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-100 rounded-full p-2">
+                            <i class="fas fa-building text-blue-600"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900">${dept.dept_name || 'N/A'}</div>
+                            <div class="text-xs text-gray-500">ID: ${dept.dept_id}</div>
                         </div>
                     </div>
-                </div>
-                <div class="mt-2">
-                    ${dept.dept_head ? `<p class="text-gray-600"><span class="font-medium">Head:</span> ${dept.dept_head}</p>` : ''}
-                    ${dept.established_year ? `<p class="text-gray-600"><span class="font-medium">Established:</span> ${dept.established_year}</p>` : ''}
-                    ${dept.budget ? `<p class="text-gray-600"><span class="font-medium">Budget:</span> ${formatCurrency(dept.budget)}</p>` : ''}
-                </div>
-                <div class="mt-4">
-                    <button class="view-more-btn text-indigo-600 hover:text-indigo-800 text-sm font-medium" data-id="${dept.dept_id}">
-                        View Details <i class="fas fa-chevron-right ml-1"></i>
-                    </button>
-                </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">
+                        ${dept.dept_head || 'Not assigned'}
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="max-w-xs">
+                        <div class="text-sm text-gray-900 line-clamp-2">
+                            ${dept.research_focus || 'N/A'}
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">
+                        ${dept.budget ? formatCurrency(dept.budget) : 'N/A'}
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        ${dept.established_year || 'N/A'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm font-medium">
+                    <div class="flex space-x-2">
+                        <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-1 rounded action-btn" 
+                                onclick="viewDepartment(${dept.dept_id})" 
+                                title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-green-600 hover:text-green-900 transition-colors p-1 rounded action-btn" 
+                                onclick="editDepartment(${dept.dept_id})" 
+                                title="Edit Department">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 transition-colors p-1 rounded action-btn" 
+                                onclick="deleteDepartment(${dept.dept_id})" 
+                                title="Delete Department">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
             `;
             
-            departmentsList.appendChild(card);
-            
-            // Dropdown toggle
-            const dropdownBtn = card.querySelector('.dropdown button');
-            const dropdownMenu = card.querySelector('.dropdown-menu');
-            
-            dropdownBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdownMenu.classList.toggle('hidden');
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', () => {
-                dropdownMenu.classList.add('hidden');
-            });
-            
-            // Action buttons
-            card.querySelector('.view-btn').addEventListener('click', () => viewDepartment(dept.dept_id));
-            card.querySelector('.edit-btn').addEventListener('click', () => showEditDepartmentModal(dept.dept_id));
-            card.querySelector('.delete-btn').addEventListener('click', () => showDeleteConfirmation(dept.dept_id));
-            card.querySelector('.view-more-btn').addEventListener('click', () => viewDepartment(dept.dept_id));
+            departmentsList.appendChild(row);
         });
         
-        departmentsList.classList.remove('hidden');
+        // Update results count after rendering
+        updateResultsCount();
+    }
+
+    function showLoadingState() {
+        if (!departmentsList) return;
+        departmentsList.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center space-y-3">
+                        <div class="loading-spinner">
+                            <i class="fas fa-circle-notch text-2xl text-blue-600"></i>
+                        </div>
+                        <p class="text-lg font-medium">Loading departments...</p>
+                        <p class="text-sm text-gray-400">Please wait while we fetch the data</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    async function loadStatistics() {
+        try {
+            console.log('📊 Loading department statistics...');
+            
+            // Update departments count
+            if (totalDepartmentsEl) {
+                totalDepartmentsEl.textContent = currentDepartments.length;
+            }
+            
+            // Calculate average budget
+            if (avgBudgetEl && currentDepartments.length > 0) {
+                const totalBudget = currentDepartments.reduce((sum, dept) => sum + (dept.budget || 0), 0);
+                const avgBudget = totalBudget / currentDepartments.length;
+                avgBudgetEl.textContent = formatCurrency(avgBudget);
+                console.log('💰 Average budget calculated:', avgBudget);
+            }
+            
+            // Find oldest department
+            if (oldestYearEl && currentDepartments.length > 0) {
+                const oldestDept = currentDepartments.reduce((oldest, current) => {
+                    if (!oldest.established_year) return current;
+                    if (!current.established_year) return oldest;
+                    return current.established_year < oldest.established_year ? current : oldest;
+                });
+                
+                if (oldestDept.established_year) {
+                    oldestYearEl.textContent = oldestDept.established_year;
+                    console.log('🏛️ Oldest department:', oldestDept.dept_name, 'established in', oldestDept.established_year);
+                } else {
+                    oldestYearEl.textContent = 'N/A';
+                }
+            }
+            
+            // Load faculty count
+            const facultyResponse = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.FACULTY);
+            if (facultyResponse.ok) {
+                const faculty = await facultyResponse.json();
+                if (totalFacultyEl) {
+                    totalFacultyEl.textContent = faculty.length;
+                    console.log('👥 Total faculty count:', faculty.length);
+                }
+            }
+            
+            console.log('✅ Statistics loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading statistics:', error);
+        }
+    }
+
+    function handleSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        if (!searchTerm) {
+            filteredDepartments = [...currentDepartments];
+        } else {
+            filteredDepartments = currentDepartments.filter(dept => 
+                dept.dept_name?.toLowerCase().includes(searchTerm) ||
+                dept.dept_head?.toLowerCase().includes(searchTerm) ||
+                dept.research_focus?.toLowerCase().includes(searchTerm) ||
+                dept.established_year?.toString().includes(searchTerm)
+            );
+        }
+        
+        updateResultsCount();
+        renderDepartments();
+    }
+
+    function handleSort() {
+        const sortBy = sortSelect.value;
+        
+        filteredDepartments.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return (a.dept_name || '').localeCompare(b.dept_name || '');
+                case 'established':
+                    return (a.established_year || 0) - (b.established_year || 0);
+                case 'budget':
+                    return (b.budget || 0) - (a.budget || 0);
+                case 'faculty_count':
+                    // For now, sort by ID as a proxy for faculty count
+                    return a.dept_id - b.dept_id;
+                default:
+                    return 0;
+            }
+        });
+        
+        renderDepartments();
+    }
+
+    function updateResultsCount() {
+        if (resultsCountEl) {
+            if (filteredDepartments.length === currentDepartments.length) {
+                resultsCountEl.textContent = `Showing all ${currentDepartments.length} departments`;
+            } else {
+                resultsCountEl.textContent = `Showing ${filteredDepartments.length} of ${currentDepartments.length} departments`;
+            }
+        }
     }
 
     function showAddDepartmentModal() {
-        // Reset form
-        departmentForm.reset();
-        deptIdInput.value = '';
-        modalTitle.textContent = 'Add Department';
-        
-        // Show modal
-        departmentModal.classList.remove('hidden');
-    }
-
-    function showEditDepartmentModal(deptId) {
-        const department = currentDepartments.find(dept => dept.dept_id === deptId);
-        if (!department) return;
-        
-        // Set form values
-        deptIdInput.value = department.dept_id;
-        deptNameInput.value = department.dept_name || '';
-        deptHeadInput.value = department.dept_head || '';
-        researchFocusInput.value = department.research_focus || '';
-        establishedYearInput.value = department.established_year || '';
-        budgetInput.value = department.budget || '';
-        
-        modalTitle.textContent = 'Edit Department';
-        
-        // Show modal
-        departmentModal.classList.remove('hidden');
+        if (modalTitle) modalTitle.textContent = 'Add Department';
+        if (departmentForm) departmentForm.reset();
+        if (departmentModal) departmentModal.classList.remove('hidden');
     }
 
     function closeModal() {
-        departmentModal.classList.add('hidden');
+        if (departmentModal) departmentModal.classList.add('hidden');
     }
 
-    async function saveDepartment(e) {
+    function saveDepartment(e) {
         e.preventDefault();
-        
-        const departmentData = {
-            dept_name: deptNameInput.value.trim(),
-            dept_head: deptHeadInput.value.trim() || null,
-            research_focus: researchFocusInput.value.trim() || null,
-            established_year: establishedYearInput.value ? parseInt(establishedYearInput.value) : null,
-            budget: budgetInput.value ? parseFloat(budgetInput.value) : null
-        };
-        
-        const isEditing = deptIdInput.value;
-        
-        try {
-            let endpoint = CONFIG.ENDPOINTS.DEPARTMENTS;
-            let method = 'POST';
-            
-            if (isEditing) {
-                endpoint = `${endpoint}/${deptIdInput.value}`;
-                method = 'PUT';
-            }
-            
-            const options = {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(departmentData)
-            };
-            
-            await fetchAPI(endpoint, options);
-            
-            showNotification(
-                `Department ${isEditing ? 'updated' : 'created'} successfully`, 
-                'success'
-            );
-            
-            closeModal();
-            await loadDepartments();
-        } catch (error) {
-            console.error(`Error ${isEditing ? 'updating' : 'creating'} department:`, error);
-            showNotification(`Failed to ${isEditing ? 'update' : 'create'} department`, 'error');
-        }
+        // TODO: Implement save functionality
+        console.log('Save department functionality to be implemented');
+        closeModal();
     }
 
-    function showDeleteConfirmation(deptId) {
-        currentDepartmentId = deptId;
-        deleteModal.classList.remove('hidden');
-        
-        confirmDeleteBtn.onclick = deleteDepartment;
-    }
-
-    async function deleteDepartment() {
-        if (!currentDepartmentId) return;
-        
-        try {
-            const endpoint = `${CONFIG.ENDPOINTS.DEPARTMENTS}/${currentDepartmentId}`;
-            const options = {
-                method: 'DELETE'
-            };
-            
-            await fetchAPI(endpoint, options);
-            
-            showNotification('Department deleted successfully', 'success');
-            deleteModal.classList.add('hidden');
-            await loadDepartments();
-        } catch (error) {
-            console.error('Error deleting department:', error);
-            showNotification('Failed to delete department', 'error');
-        } finally {
-            currentDepartmentId = null;
+    // Global functions for button clicks
+    window.viewDepartment = function(deptId) {
+        console.log('👁️ View department:', deptId);
+        const dept = currentDepartments.find(d => d.dept_id === deptId);
+        if (dept) {
+            const details = `
+Department: ${dept.dept_name}
+Head: ${dept.dept_head || 'Not assigned'}
+Research Focus: ${dept.research_focus || 'N/A'}
+Established: ${dept.established_year || 'N/A'}
+Budget: ${dept.budget ? formatCurrency(dept.budget) : 'N/A'}
+            `;
+            alert(details);
         }
-    }
+    };
 
-    async function viewDepartment(deptId) {
-        const department = currentDepartments.find(dept => dept.dept_id === deptId);
-        if (!department) return;
-        
-        // Show department details
-        const departmentDetails = document.getElementById('department-details');
-        departmentDetails.innerHTML = `
-            <h2 class="text-2xl font-bold text-indigo-800 mb-4">${department.dept_name}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
-                <div>
-                    <p class="text-gray-500 text-sm">Department Head</p>
-                    <p class="text-gray-800 font-medium">${department.dept_head || 'Not specified'}</p>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">Established Year</p>
-                    <p class="text-gray-800 font-medium">${department.established_year || 'Not specified'}</p>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">Annual Budget</p>
-                    <p class="text-gray-800 font-medium">${department.budget ? formatCurrency(department.budget) : 'Not specified'}</p>
-                </div>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm">Research Focus</p>
-                <p class="text-gray-800">${department.research_focus || 'No research focus specified'}</p>
-            </div>
-        `;
-        
-        // Show and populate analytics
-        const analyticsSection = document.getElementById('dept-analytics');
-        const analyticsLoading = document.getElementById('dept-analytics-loading');
-        
-        analyticsSection.classList.add('hidden');
-        analyticsLoading.classList.remove('hidden');
-        
-        detailModal.classList.remove('hidden');
-        
-        try {
-            const analyticsData = await fetchAPI(`${CONFIG.ENDPOINTS.ANALYTICS_DEPARTMENT}/${department.dept_id}`);
-            
-            // Update analytics UI
-            document.getElementById('faculty-count').textContent = analyticsData.faculty_count;
-            document.getElementById('student-count').textContent = analyticsData.student_count;
-            document.getElementById('project-count').textContent = analyticsData.project_count;
-            
-            // Projects details
-            const projectDetails = document.getElementById('project-details');
-            projectDetails.innerHTML = analyticsData.active_projects ? 
-                `<p>${analyticsData.active_projects} active projects</p>` : '';
-            
-            if (analyticsData.total_project_budget) {
-                projectDetails.innerHTML += `<p>Total budget: ${formatCurrency(analyticsData.total_project_budget)}</p>`;
-            }
-            
-            // Render student programs chart
-            if (analyticsData.student_program_distribution) {
-                renderProgramChart(analyticsData.student_program_distribution);
-            }
-            
-            analyticsLoading.classList.add('hidden');
-            analyticsSection.classList.remove('hidden');
-        } catch (error) {
-            console.error('Error loading department analytics:', error);
-            analyticsLoading.classList.add('hidden');
-            document.getElementById('dept-analytics').innerHTML = 
-                '<p class="text-red-500">Failed to load analytics data</p>';
-        }
-    }
+    window.editDepartment = function(deptId) {
+        console.log('✏️ Edit department:', deptId);
+        // TODO: Implement edit functionality
+        alert('Edit functionality to be implemented');
+    };
 
-    function renderProgramChart(programData) {
-        const programChartEl = document.getElementById('program-chart');
-        programChartEl.innerHTML = '';
-        
-        const programs = Object.keys(programData);
-        if (programs.length === 0) {
-            programChartEl.innerHTML = '<p class="text-gray-500">No student data available</p>';
-            return;
+    window.deleteDepartment = function(deptId) {
+        console.log('🗑️ Delete department:', deptId);
+        // TODO: Implement delete functionality
+        if (confirm('Are you sure you want to delete this department?')) {
+            alert('Delete functionality to be implemented');
         }
-        
-        const options = {
-            series: Object.values(programData),
-            labels: programs,
-            chart: {
-                type: 'donut',
-                height: 200
-            },
-            colors: CONFIG.CHART_COLORS,
-            legend: {
-                position: 'bottom',
-                fontSize: '14px'
-            },
-            dataLabels: {
-                enabled: false
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '55%'
-                    }
-                }
-            }
-        };
-        
-        const chart = new ApexCharts(programChartEl, options);
-        chart.render();
-    }
+    };
 });
+
+// Utility function for currency formatting
+function formatCurrency(amount) {
+    if (amount === null || amount === undefined) return 'N/A';
+    
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}

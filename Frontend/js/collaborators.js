@@ -15,15 +15,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteModal = document.getElementById('delete-modal');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const detailModal = document.getElementById('detail-modal');
-    const closeDetailBtn = document.getElementById('close-detail-btn');
-    const closeDetailsBtn = document.getElementById('close-details-btn');
-    const editCollaboratorBtn = document.getElementById('edit-collaborator-btn');
     
+    // Statistics elements
+    const totalCollaborations = document.getElementById('total-collaborations');
+    const uniqueProjects = document.getElementById('unique-projects');
+    const facultyInvolved = document.getElementById('faculty-involved');
+    const principalInvestigators = document.getElementById('principal-investigators');
+    
+    // Search and filter elements
     const collaboratorSearchInput = document.getElementById('collaborator-search');
     const projectFilter = document.getElementById('project-filter');
-    const typeFilter = document.getElementById('type-filter');
+    const roleFilter = document.getElementById('role-filter');
     const searchBtn = document.getElementById('search-btn');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+    const resultsCountEl = document.getElementById('results-count');
     
     // Pagination
     const paginationSection = document.getElementById('pagination');
@@ -35,21 +40,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form fields
     const collaboratorIdInput = document.getElementById('collaborator-id');
-    const firstNameInput = document.getElementById('first-name');
-    const lastNameInput = document.getElementById('last-name');
-    const emailInput = document.getElementById('email');
-    const phoneInput = document.getElementById('phone');
-    const institutionInput = document.getElementById('institution');
-    const typeSelect = document.getElementById('type');
-    const websiteInput = document.getElementById('website');
-    const expertiseInput = document.getElementById('expertise');
-    const notesInput = document.getElementById('notes');
-    const projectSelectionDiv = document.getElementById('project-selection');
+    const facultyIdInput = document.getElementById('faculty-id');
+    const projectIdInput = document.getElementById('project-id');
+    const roleInput = document.getElementById('role');
+    const involvementPercentageInput = document.getElementById('involvement-percentage');
 
     // State variables
     let allCollaborators = [];
     let filteredCollaborators = [];
     let projects = [];
+    let faculty = [];
     let currentCollaboratorId = null;
     let currentPage = 1;
     let itemsPerPage = CONFIG.PAGINATION.ITEMS_PER_PAGE;
@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
         filterCollaborators();
     });
 
+    clearFiltersBtn.addEventListener('click', clearFilters);
+
     // Modal events
     addCollaboratorBtn.addEventListener('click', showAddCollaboratorModal);
     closeModalBtn.addEventListener('click', closeModal);
@@ -71,21 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     cancelDeleteBtn.addEventListener('click', () => {
         deleteModal.classList.add('hidden');
-    });
-    
-    closeDetailBtn.addEventListener('click', () => {
-        detailModal.classList.add('hidden');
-    });
-    
-    closeDetailsBtn.addEventListener('click', () => {
-        detailModal.classList.add('hidden');
-    });
-    
-    editCollaboratorBtn.addEventListener('click', () => {
-        detailModal.classList.add('hidden');
-        if (currentCollaboratorId) {
-            showEditCollaboratorModal(currentCollaboratorId);
-        }
     });
     
     // Pagination
@@ -103,20 +90,115 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            collaboratorSearchInput.focus();
+        }
+    });
+
+    // Search input events
+    collaboratorSearchInput.addEventListener('input', debounce(() => {
+        currentPage = 1;
+        filterCollaborators();
+    }, 300));
+
+    // Filter change events
+    projectFilter.addEventListener('change', () => {
+        currentPage = 1;
+        filterCollaborators();
+    });
+
+    roleFilter.addEventListener('change', () => {
+        currentPage = 1;
+        filterCollaborators();
+    });
+
+    // Close modals when clicking outside
+    collaboratorModal.addEventListener('click', (e) => {
+        if (e.target === collaboratorModal) {
+            closeModal();
+        }
+    });
+    
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) {
+            deleteModal.classList.add('hidden');
+        }
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (!collaboratorModal.classList.contains('hidden')) {
+                closeModal();
+            }
+            if (!deleteModal.classList.contains('hidden')) {
+                deleteModal.classList.add('hidden');
+            }
+        }
+    });
+
+    /**
+     * Initialize the page
+     */
     async function initPage() {
         try {
-            // Load projects for filters
-            projects = await fetchAPI(CONFIG.ENDPOINTS.PROJECTS);
+            console.log('🚀 Initializing collaborators page...');
+            
+            // Load projects and faculty for filters
+            await Promise.all([
+                loadProjects(),
+                loadFaculty()
+            ]);
+            
+            // Populate filters
             populateProjectFilter();
+            populateFacultyFilter();
+            
+            // Load collaborators
+            await loadCollaborators();
             
         } catch (error) {
             console.error('Error loading initial data:', error);
             showNotification('Failed to load initial data', 'error');
         }
-        
-        await loadCollaborators();
     }
 
+    /**
+     * Load projects for filters
+     */
+    async function loadProjects() {
+        try {
+            const response = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.PROJECTS);
+            if (response.ok) {
+                projects = await response.json();
+                console.log('Projects loaded:', projects);
+            }
+        } catch (error) {
+            console.error('Error loading projects:', error);
+        }
+    }
+
+    /**
+     * Load faculty for filters
+     */
+    async function loadFaculty() {
+        try {
+            const response = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.FACULTY);
+            if (response.ok) {
+                faculty = await response.json();
+                console.log('Faculty loaded:', faculty);
+            }
+        } catch (error) {
+            console.error('Error loading faculty:', error);
+        }
+    }
+
+    /**
+     * Populate project filter dropdown
+     */
     function populateProjectFilter() {
         // Clear existing options except the first one
         while (projectFilter.options.length > 1) {
@@ -127,78 +209,51 @@ document.addEventListener('DOMContentLoaded', function() {
         projects.forEach(project => {
             const option = document.createElement('option');
             option.value = project.project_id;
-            option.textContent = project.title;
+            option.textContent = project.project_title;
             projectFilter.appendChild(option);
         });
     }
 
-    function populateProjectSelection(selectedProjects = []) {
-        // Populate project selection
-        projectSelectionDiv.innerHTML = projects.length === 0 ? 
-            '<div class="text-gray-500">No projects available</div>' : '';
-        
-        if (projects.length > 0) {
-            // Group projects by department
-            const projectsByDept = {};
-            
-            projects.forEach(project => {
-                if (!projectsByDept[project.dept_id]) {
-                    projectsByDept[project.dept_id] = [];
-                }
-                projectsByDept[project.dept_id].push(project);
-            });
-            
-            // Get departments
-            fetchAPI(CONFIG.ENDPOINTS.DEPARTMENTS)
-                .then(departments => {
-                    // Create project checkboxes by department
-                    Object.keys(projectsByDept).forEach(deptId => {
-                        const dept = departments.find(d => d.dept_id === parseInt(deptId));
-                        const deptName = dept ? dept.dept_name : 'Unknown Department';
-                        
-                        const deptSection = document.createElement('div');
-                        deptSection.className = 'mb-3';
-                        deptSection.innerHTML = `<h5 class="font-medium text-indigo-800 mb-1">${deptName}</h5>`;
-                        
-                        const projectList = document.createElement('div');
-                        projectList.className = 'space-y-1 pl-2';
-                        
-                        projectsByDept[deptId].forEach(project => {
-                            const isChecked = selectedProjects.includes(project.project_id);
-                            
-                            projectList.innerHTML += `
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="project-${project.project_id}" name="project" 
-                                        value="${project.project_id}" class="form-checkbox h-4 w-4 text-indigo-600"
-                                        ${isChecked ? 'checked' : ''}>
-                                    <label for="project-${project.project_id}" class="ml-2 text-sm">
-                                        ${project.title} 
-                                        <span class="text-gray-500">${project.is_active ? '(Active)' : '(Completed)'}</span>
-                                    </label>
-                                </div>
-                            `;
-                        });
-                        
-                        deptSection.appendChild(projectList);
-                        projectSelectionDiv.appendChild(deptSection);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading departments:', error);
-                    projectSelectionDiv.innerHTML = '<div class="text-red-500">Error loading project data</div>';
-                });
+    /**
+     * Populate faculty filter dropdown
+     */
+    function populateFacultyFilter() {
+        // Clear existing options except the first one
+        while (facultyIdInput.options.length > 1) {
+            facultyIdInput.remove(1);
         }
+        
+        // Add faculty options
+        faculty.forEach(facultyMember => {
+            const option = document.createElement('option');
+            option.value = facultyMember.faculty_id;
+            option.textContent = `${facultyMember.first_name} ${facultyMember.last_name}`;
+            facultyIdInput.appendChild(option);
+        });
     }
 
+    /**
+     * Load collaborators from API
+     */
     async function loadCollaborators() {
         showLoading(true);
         
         try {
-            // Load all collaborators from API
-            allCollaborators = await fetchAPI(CONFIG.ENDPOINTS.PROJECT_COLLABORATORS);
+            console.log('📡 Loading collaborators from API...');
+            const response = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.PROJECT_COLLABORATORS);
             
-            // Apply initial filters
-            filterCollaborators();
+            if (response.ok) {
+                allCollaborators = await response.json();
+                console.log('Collaborators loaded:', allCollaborators);
+                
+                // Apply initial filters
+                filterCollaborators();
+                
+                // Load statistics
+                loadStatistics();
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         } catch (error) {
             console.error('Error loading collaborators:', error);
             showNotification('Failed to load collaborators', 'error');
@@ -207,31 +262,106 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * Load and display statistics
+     */
+    function loadStatistics() {
+        try {
+            console.log('📊 Loading statistics...');
+            
+            // Calculate statistics from collaborators data
+            const totalCollabs = allCollaborators.length;
+            const uniqueProjectIds = [...new Set(allCollaborators.map(c => c.project_id))];
+            const uniqueFacultyIds = [...new Set(allCollaborators.map(c => c.faculty_id))];
+            const principalInvestigatorCount = allCollaborators.filter(c => 
+                c.role === 'Principal Investigator'
+            ).length;
+            
+            console.log('Statistics calculated:', {
+                totalCollabs,
+                uniqueProjectIds: uniqueProjectIds.length,
+                uniqueFacultyIds: uniqueFacultyIds.length,
+                principalInvestigatorCount
+            });
+            
+            // Update statistics display
+            if (totalCollaborations) totalCollaborations.textContent = totalCollabs;
+            if (uniqueProjects) uniqueProjects.textContent = uniqueProjectIds.length;
+            if (facultyInvolved) facultyInvolved.textContent = uniqueFacultyIds.length;
+            if (principalInvestigators) principalInvestigators.textContent = principalInvestigatorCount;
+            
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+        }
+    }
+
+    /**
+     * Filter collaborators based on search and filters
+     */
     function filterCollaborators() {
         const searchTerm = collaboratorSearchInput.value.trim().toLowerCase();
         const projectId = projectFilter.value;
-        const collaboratorType = typeFilter.value;
+        const roleFilterValue = roleFilter.value;
+        
+        console.log('🔍 Filtering collaborators:', { searchTerm, projectId, roleFilterValue });
         
         // Apply filters
         filteredCollaborators = allCollaborators.filter(collaborator => {
             // Filter by search term
-            const nameMatches = 
-                `${collaborator.first_name} ${collaborator.last_name}`.toLowerCase().includes(searchTerm) ||
-                (collaborator.institution && collaborator.institution.toLowerCase().includes(searchTerm));
+            const nameMatches = collaborator.faculty_name.toLowerCase().includes(searchTerm) ||
+                               collaborator.project_title.toLowerCase().includes(searchTerm) ||
+                               collaborator.role.toLowerCase().includes(searchTerm);
                 
             // Filter by project
-            const projectMatches = !projectId || 
-                (collaborator.projects && collaborator.projects.some(p => p.project_id === parseInt(projectId)));
+            const projectMatches = !projectId || collaborator.project_id === parseInt(projectId);
                 
-            // Filter by type
-            const typeMatches = !collaboratorType || collaborator.type === collaboratorType;
+            // Filter by role
+            const roleMatches = !roleFilterValue || collaborator.role === roleFilterValue;
             
-            return nameMatches && projectMatches && typeMatches;
+            return nameMatches && projectMatches && roleMatches;
         });
         
+        console.log('Filtered collaborators:', filteredCollaborators);
+        
+        // Update results count
+        updateResultsCount();
+        
+        // Render collaborators
         renderCollaborators();
     }
 
+    /**
+     * Update results count display
+     */
+    function updateResultsCount() {
+        if (resultsCountEl) {
+            const total = filteredCollaborators.length;
+            const searchQuery = collaboratorSearchInput.value.trim();
+            const projectFilterValue = projectFilter.value;
+            const roleFilterValue = roleFilter.value;
+            
+            if (searchQuery || projectFilterValue || roleFilterValue) {
+                resultsCountEl.textContent = `Showing ${total} filtered collaborations`;
+            } else {
+                resultsCountEl.textContent = `Showing all ${total} collaborations`;
+            }
+        }
+    }
+
+    /**
+     * Clear all filters
+     */
+    function clearFilters() {
+        collaboratorSearchInput.value = '';
+        projectFilter.value = '';
+        roleFilter.value = '';
+        currentPage = 1;
+        filterCollaborators();
+    }
+
+    /**
+     * Render collaborators in the table
+     */
     function renderCollaborators() {
         // Calculate pagination
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -262,52 +392,38 @@ document.addEventListener('DOMContentLoaded', function() {
         // Render each collaborator
         pageCollaborators.forEach(collaborator => {
             const row = document.createElement('tr');
-            
-            // Format projects list
-            let projectsList = '';
-            if (collaborator.projects && collaborator.projects.length > 0) {
-                projectsList = collaborator.projects
-                    .slice(0, 2)
-                    .map(p => p.title)
-                    .join(', ');
-                
-                if (collaborator.projects.length > 2) {
-                    projectsList += ` +${collaborator.projects.length - 2} more`;
-                }
-            } else {
-                projectsList = 'No projects';
-            }
+            row.className = 'hover:bg-gray-50 transition-colors duration-200';
             
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-indigo-600"></i>
+                        </div>
                         <div>
-                            <div class="text-sm font-medium text-gray-900">${collaborator.first_name} ${collaborator.last_name}</div>
+                            <div class="text-sm font-medium text-gray-900">${collaborator.faculty_name}</div>
+                            <div class="text-sm text-gray-500">ID: ${collaborator.faculty_id}</div>
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${collaborator.institution || 'N/A'}</div>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900 line-clamp-2">${collaborator.project_title}</div>
+                    <div class="text-sm text-gray-500">ID: ${collaborator.project_id}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                        ${collaborator.type || 'Unknown'}
-                    </span>
+                    <span class="role-badge ${getRoleBadgeClass(collaborator.role)}">${collaborator.role}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${projectsList}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${collaborator.email}
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 font-semibold">${collaborator.involvement_percentage}%</div>
+                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width: ${collaborator.involvement_percentage}%"></div>
+                    </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button data-id="${collaborator.id}" class="view-btn text-indigo-600 hover:text-indigo-900 mr-4">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button data-id="${collaborator.id}" class="edit-btn text-blue-600 hover:text-blue-900 mr-4">
+                    <button data-id="${collaborator.project_id}" data-faculty="${collaborator.faculty_id}" class="edit-btn text-blue-600 hover:text-blue-900 mr-4 transition-colors">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button data-id="${collaborator.id}" class="delete-btn text-red-600 hover:text-red-900">
+                    <button data-id="${collaborator.project_id}" data-faculty="${collaborator.faculty_id}" class="delete-btn text-red-600 hover:text-red-900 transition-colors">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </td>
@@ -317,28 +433,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Add event listeners to action buttons
-        document.querySelectorAll('.view-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = parseInt(button.getAttribute('data-id'));
-                showCollaboratorDetails(id);
-            });
-        });
-        
+        setupEventDelegation();
+    }
+
+    /**
+     * Setup event delegation for action buttons
+     */
+    function setupEventDelegation() {
+        // Handle edit buttons
         document.querySelectorAll('.edit-btn').forEach(button => {
             button.addEventListener('click', () => {
-                const id = parseInt(button.getAttribute('data-id'));
-                showEditCollaboratorModal(id);
+                const projectId = parseInt(button.getAttribute('data-id'));
+                const facultyId = parseInt(button.getAttribute('data-faculty'));
+                showEditCollaboratorModal(projectId, facultyId);
             });
         });
         
+        // Handle delete buttons
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', () => {
-                const id = parseInt(button.getAttribute('data-id'));
-                showDeleteConfirmation(id);
+                const projectId = parseInt(button.getAttribute('data-id'));
+                const facultyId = parseInt(button.getAttribute('data-faculty'));
+                showDeleteConfirmation(projectId, facultyId);
             });
         });
     }
 
+    /**
+     * Get role badge CSS class
+     */
+    function getRoleBadgeClass(role) {
+        switch (role) {
+            case 'Principal Investigator':
+                return 'principal';
+            case 'Co-Investigator':
+                return 'co-investigator';
+            case 'Consultant':
+                return 'consultant';
+            case 'Collaborator':
+                return 'collaborator';
+            case 'Data Science Consultant':
+                return 'data-science';
+            default:
+                return 'collaborator';
+        }
+    }
+
+    /**
+     * Show loading state
+     */
     function showLoading(isLoading) {
         if (isLoading) {
             loadingIndicator.classList.remove('hidden');
@@ -350,6 +493,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * Show add collaborator modal
+     */
     function showAddCollaboratorModal() {
         modalTitle.textContent = 'Add Project Collaborator';
         
@@ -357,89 +503,82 @@ document.addEventListener('DOMContentLoaded', function() {
         collaboratorForm.reset();
         collaboratorIdInput.value = '';
         
-        // Populate project selection with empty selection
-        populateProjectSelection([]);
-        
         // Show modal
         collaboratorModal.classList.remove('hidden');
     }
 
-    function showEditCollaboratorModal(collaboratorId) {
-        const collaborator = allCollaborators.find(c => c.id === collaboratorId);
+    /**
+     * Show edit collaborator modal
+     */
+    function showEditCollaboratorModal(projectId, facultyId) {
+        const collaborator = allCollaborators.find(c => 
+            c.project_id === projectId && c.faculty_id === facultyId
+        );
+        
         if (!collaborator) return;
         
         modalTitle.textContent = 'Edit Project Collaborator';
-        currentCollaboratorId = collaboratorId;
+        currentCollaboratorId = { projectId, facultyId };
         
         // Fill form fields
-        collaboratorIdInput.value = collaborator.id;
-        firstNameInput.value = collaborator.first_name;
-        lastNameInput.value = collaborator.last_name;
-        emailInput.value = collaborator.email;
-        phoneInput.value = collaborator.phone || '';
-        institutionInput.value = collaborator.institution || '';
-        typeSelect.value = collaborator.type || '';
-        websiteInput.value = collaborator.website || '';
-        expertiseInput.value = collaborator.expertise || '';
-        notesInput.value = collaborator.notes || '';
-        
-        // Get selected project IDs
-        const selectedProjects = collaborator.projects ? 
-            collaborator.projects.map(p => p.project_id) : [];
-            
-        // Populate project selection
-        populateProjectSelection(selectedProjects);
+        facultyIdInput.value = collaborator.faculty_id;
+        projectIdInput.value = collaborator.project_id;
+        roleInput.value = collaborator.role;
+        involvementPercentageInput.value = collaborator.involvement_percentage;
         
         // Show modal
         collaboratorModal.classList.remove('hidden');
     }
 
+    /**
+     * Close collaborator modal
+     */
     function closeModal() {
         collaboratorModal.classList.add('hidden');
+        currentCollaboratorId = null;
     }
 
+    /**
+     * Save collaborator data
+     */
     async function saveCollaborator(event) {
         event.preventDefault();
         
-        // Get selected projects
-        const selectedProjects = Array.from(
-            document.querySelectorAll('#project-selection input[type="checkbox"]:checked')
-        ).map(checkbox => parseInt(checkbox.value));
+        // Validate form
+        if (!collaboratorForm.checkValidity()) {
+            collaboratorForm.reportValidity();
+            return;
+        }
         
-        // Create collaborator object
-        const collaboratorData = {
-            first_name: firstNameInput.value.trim(),
-            last_name: lastNameInput.value.trim(),
-            email: emailInput.value.trim(),
-            phone: phoneInput.value.trim() || null,
-            institution: institutionInput.value.trim() || null,
-            type: typeSelect.value,
-            website: websiteInput.value.trim() || null,
-            expertise: expertiseInput.value.trim() || null,
-            notes: notesInput.value.trim() || null,
-            project_ids: selectedProjects
+        // Collect form data
+        const formData = {
+            project_id: parseInt(projectIdInput.value),
+            faculty_id: parseInt(facultyIdInput.value),
+            role: roleInput.value,
+            involvement_percentage: parseFloat(involvementPercentageInput.value)
         };
         
         try {
             let response;
-            const collaboratorId = collaboratorIdInput.value;
             
-            if (collaboratorId) {
+            if (currentCollaboratorId) {
                 // Update existing collaborator
+                console.log('Updating collaborator:', currentCollaboratorId);
                 response = await fetchAPI(
-                    `${CONFIG.ENDPOINTS.PROJECT_COLLABORATORS}/${collaboratorId}`, 
+                    `${CONFIG.ENDPOINTS.PROJECT_COLLABORATORS}/${currentCollaboratorId.projectId}/${currentCollaboratorId.facultyId}`, 
                     'PUT', 
-                    collaboratorData
+                    formData
                 );
-                showNotification('Collaborator updated successfully', 'success');
+                showNotification('Collaboration updated successfully', 'success');
             } else {
                 // Create new collaborator
+                console.log('Creating new collaborator:', formData);
                 response = await fetchAPI(
                     CONFIG.ENDPOINTS.PROJECT_COLLABORATORS, 
                     'POST', 
-                    collaboratorData
+                    formData
                 );
-                showNotification('Collaborator added successfully', 'success');
+                showNotification('Collaboration added successfully', 'success');
             }
             
             // Reload collaborators
@@ -449,24 +588,31 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         } catch (error) {
             console.error('Error saving collaborator:', error);
-            showNotification('Failed to save collaborator: ' + (error.message || 'Unknown error'), 'error');
+            showNotification('Failed to save collaboration: ' + (error.message || 'Unknown error'), 'error');
         }
     }
 
-    function showDeleteConfirmation(collaboratorId) {
-        currentCollaboratorId = collaboratorId;
+    /**
+     * Show delete confirmation modal
+     */
+    function showDeleteConfirmation(projectId, facultyId) {
+        currentCollaboratorId = { projectId, facultyId };
         deleteModal.classList.remove('hidden');
         
         confirmDeleteBtn.onclick = async () => {
             try {
-                await fetchAPI(`${CONFIG.ENDPOINTS.PROJECT_COLLABORATORS}/${collaboratorId}`, 'DELETE');
-                showNotification('Collaborator deleted successfully', 'success');
+                await fetchAPI(
+                    `${CONFIG.ENDPOINTS.PROJECT_COLLABORATORS}/${projectId}/${facultyId}`, 
+                    'DELETE'
+                );
+                
+                showNotification('Collaboration deleted successfully', 'success');
                 
                 // Reload collaborators
                 await loadCollaborators();
             } catch (error) {
                 console.error('Error deleting collaborator:', error);
-                showNotification('Failed to delete collaborator', 'error');
+                showNotification('Failed to delete collaboration', 'error');
             } finally {
                 deleteModal.classList.add('hidden');
                 currentCollaboratorId = null;
@@ -474,69 +620,18 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    function showCollaboratorDetails(collaboratorId) {
-        const collaborator = allCollaborators.find(c => c.id === collaboratorId);
-        if (!collaborator) return;
-        
-        currentCollaboratorId = collaboratorId;
-        
-        // Build HTML for collaborator details
-        const detailsDiv = document.getElementById('collaborator-details');
-        
-        detailsDiv.innerHTML = `
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">${collaborator.first_name} ${collaborator.last_name}</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-sm text-gray-500">Contact Information</p>
-                    <p class="mb-1"><strong>Email:</strong> ${collaborator.email}</p>
-                    <p class="mb-1"><strong>Phone:</strong> ${collaborator.phone || 'Not provided'}</p>
-                    <p class="mb-1"><strong>Website:</strong> ${
-                        collaborator.website ? 
-                        `<a href="${collaborator.website}" target="_blank" class="text-indigo-600 hover:underline">${collaborator.website}</a>` : 
-                        'Not provided'
-                    }</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Organization</p>
-                    <p class="mb-1"><strong>Institution:</strong> ${collaborator.institution || 'Not provided'}</p>
-                    <p class="mb-1"><strong>Type:</strong> ${collaborator.type || 'Not specified'}</p>
-                    <p class="mb-1"><strong>Expertise:</strong> ${collaborator.expertise || 'Not specified'}</p>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <p class="text-sm text-gray-500">Notes</p>
-                <p class="p-2 bg-gray-50 rounded">${collaborator.notes || 'No notes available'}</p>
-            </div>
-        `;
-        
-        // Build HTML for associated projects
-        const projectsDiv = document.getElementById('associated-projects');
-        
-        if (!collaborator.projects || collaborator.projects.length === 0) {
-            projectsDiv.innerHTML = '<p class="text-gray-500">No projects associated with this collaborator</p>';
-        } else {
-            projectsDiv.innerHTML = '';
-            
-            collaborator.projects.forEach(project => {
-                projectsDiv.innerHTML += `
-                    <div class="bg-white border rounded-lg p-3 hover:shadow-md">
-                        <h5 class="font-semibold text-indigo-800">${project.title}</h5>
-                        <p class="text-sm text-gray-600">${project.description ? project.description.substring(0, 100) + '...' : 'No description'}</p>
-                        <p class="text-xs text-gray-500 mt-1">
-                            ${new Date(project.start_date).toLocaleDateString()} - 
-                            ${project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Ongoing'}
-                            <span class="ml-2 ${project.is_active ? 'text-green-600' : 'text-red-600'}">
-                                ${project.is_active ? 'Active' : 'Completed'}
-                            </span>
-                        </p>
-                    </div>
-                `;
-            });
-        }
-        
-        // Show modal
-        detailModal.classList.remove('hidden');
+    /**
+     * Debounce function for search input
+     */
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 });
