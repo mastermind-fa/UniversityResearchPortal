@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadDashboardCharts();
         await loadRecentProjects();
         await loadTopResearchers();
+        await loadResearchAreas();
         
     } catch (error) {
         console.error('Error loading dashboard:', error);
@@ -561,6 +562,143 @@ async function loadTopResearchers() {
         // Show error message in container
         const container = document.getElementById('top-researchers');
         container.innerHTML = '<p class="text-red-500 text-center py-8">Error loading researchers. Please try again.</p>';
+    }
+}
+
+/**
+ * Load and display research areas dynamically
+ */
+async function loadResearchAreas() {
+    try {
+        console.log('🔄 Loading research areas...');
+        
+        const [departmentsData, projectsData] = await Promise.all([
+            fetchAPI(CONFIG.ENDPOINTS.DEPARTMENTS),
+            fetchAPI(CONFIG.ENDPOINTS.PROJECTS)
+        ]);
+
+        console.log('🏢 Departments data:', departmentsData);
+        console.log('📊 Projects data:', projectsData);
+
+        // Calculate active projects per department
+        const departmentStats = departmentsData.map(dept => {
+            const deptProjects = projectsData.filter(proj => 
+                proj.dept_id === dept.dept_id && 
+                (proj.status === 'Active' || proj.is_active)
+            );
+            
+            return {
+                ...dept,
+                activeProjects: deptProjects.length
+            };
+        });
+
+        // Sort by active projects count (descending)
+        const sortedDepartments = departmentStats
+            .sort((a, b) => b.activeProjects - a.activeProjects)
+            .slice(0, 6); // Show top 6 departments
+
+        console.log('📋 Department stats:', departmentStats);
+        console.log('🏆 Top departments:', sortedDepartments);
+
+        // Get the research areas container - find section with "Research Areas" heading
+        const allSections = document.querySelectorAll('section');
+        let researchAreasSection = null;
+        let researchAreasGrid = null;
+        
+        for (const section of allSections) {
+            const heading = section.querySelector('h2');
+            if (heading && heading.textContent.includes('Research Areas')) {
+                researchAreasSection = section;
+                researchAreasGrid = section.querySelector('.grid');
+                break;
+            }
+        }
+        
+        if (!researchAreasSection || !researchAreasGrid) {
+            console.warn('⚠️ Research areas section or grid not found');
+            return;
+        }
+
+        // Clear existing content
+        researchAreasGrid.innerHTML = '';
+
+        // Define color schemes for different departments
+        const colorSchemes = [
+            'from-blue-500 to-blue-600',
+            'from-green-500 to-green-600',
+            'from-purple-500 to-purple-600',
+            'from-orange-500 to-orange-600',
+            'from-teal-500 to-teal-600',
+            'from-indigo-500 to-indigo-600'
+        ];
+
+        // Define icons for different research areas
+        const getDepartmentIcon = (deptName) => {
+            const lowerName = deptName.toLowerCase();
+            if (lowerName.includes('computer') || lowerName.includes('cs')) return 'fas fa-robot';
+            if (lowerName.includes('biology') || lowerName.includes('bio')) return 'fas fa-dna';
+            if (lowerName.includes('chemistry')) return 'fas fa-atom';
+            if (lowerName.includes('physics')) return 'fas fa-atom';
+            if (lowerName.includes('math')) return 'fas fa-calculator';
+            if (lowerName.includes('engineering')) return 'fas fa-cogs';
+            return 'fas fa-flask'; // default icon
+        };
+
+        // Populate research areas dynamically
+        sortedDepartments.forEach((dept, index) => {
+            const colorScheme = colorSchemes[index % colorSchemes.length];
+            const icon = getDepartmentIcon(dept.dept_name);
+            
+            const researchAreaCard = document.createElement('div');
+            researchAreaCard.className = `bg-gradient-to-br ${colorScheme} rounded-xl p-6 text-white transform hover:scale-105 transition-all duration-300`;
+            researchAreaCard.innerHTML = `
+                <div class="flex items-center mb-4">
+                    <i class="${icon} text-3xl mr-4"></i>
+                    <h3 class="text-xl font-semibold">${dept.dept_name}</h3>
+                </div>
+                <p class="text-${colorScheme.includes('blue') ? 'blue' : colorScheme.includes('green') ? 'green' : colorScheme.includes('purple') ? 'purple' : colorScheme.includes('orange') ? 'orange' : colorScheme.includes('teal') ? 'teal' : 'indigo'}-100 mb-4">
+                    ${dept.activeProjects} Active Research Projects
+                </p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm">${dept.activeProjects} Active Projects</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            `;
+            
+            // Add click event to navigate to projects page with department filter
+            researchAreaCard.addEventListener('click', () => {
+                window.location.href = `pages/projects.html?dept_id=${dept.dept_id}`;
+            });
+            
+            researchAreasGrid.appendChild(researchAreaCard);
+        });
+
+        console.log('✅ Research areas loaded successfully');
+
+    } catch (error) {
+        console.error('❌ Error loading research areas:', error);
+        // Show error message in research areas section
+        const allSections = document.querySelectorAll('section');
+        let researchAreasSection = null;
+        let researchAreasGrid = null;
+        
+        for (const section of allSections) {
+            const heading = section.querySelector('h2');
+            if (heading && heading.textContent.includes('Research Areas')) {
+                researchAreasSection = section;
+                researchAreasGrid = section.querySelector('.grid');
+                break;
+            }
+        }
+        
+        if (researchAreasSection && researchAreasGrid) {
+            researchAreasGrid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-red-500">Error loading research areas. Please try again.</p>
+                </div>
+            `;
+        }
     }
 }
 
