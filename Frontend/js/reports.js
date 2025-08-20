@@ -54,6 +54,215 @@ document.addEventListener('DOMContentLoaded', function() {
     generateProjectsReportBtn.addEventListener('click', generateProjectsReport);
     generatePublicationsReportBtn.addEventListener('click', generatePublicationsReport);
     generateFundingReportBtn.addEventListener('click', generateFundingReport);
+    async function generateFundingReport() {
+        showLoading();
+        try {
+            // Fetch summary stats
+            const summaryRes = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.FUNDING_SUMMARY);
+            if (!summaryRes.ok) throw new Error('Failed to fetch funding summary');
+            const summary = await summaryRes.json();
+
+            // Fetch project funding allocations (first page, larger limit)
+            const selectedType = fundingTypeSelect.value || '';
+            const allocQuery = new URLSearchParams({ page: '1', limit: '100' });
+            if (selectedType) allocQuery.append('type', selectedType);
+            const allocRes = await fetch(CONFIG.API_BASE_URL + `${CONFIG.ENDPOINTS.PROJECT_FUNDING}?${allocQuery.toString()}`);
+            if (!allocRes.ok) throw new Error('Failed to fetch funding allocations');
+            const allocations = await allocRes.json();
+            const items = allocations.items || [];
+
+            // Title/subtitle
+            reportTitle.textContent = 'Research Funding Report';
+            reportSubtitle.textContent = `${allocations.total} Allocations${selectedType ? ' • Filter: ' + selectedType : ''} • ${formatCurrency(summary.total_funding)} Total`;
+
+            // Build content
+            let content = `
+                <div class="mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-orange-800">${formatCurrency(summary.total_funding)}</h4>
+                                    <p class="text-orange-600 font-medium">Total Funding</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-invoice-dollar text-indigo-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-indigo-800">${allocations.total}</h4>
+                                    <p class="text-indigo-600 font-medium">Funding Allocations</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-sitemap text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-green-800">${Object.keys(summary.funding_by_type || {}).length}</h4>
+                                    <p class="text-green-600 font-medium">Source Types</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Counts by Funding Type -->
+                <div class="mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        ${(() => {
+                            const allTypes = ['Government','Private','University','International'];
+                            const typeCounts = { Government: 0, Private: 0, University: 0, International: 0 };
+                            const typeTotals = { Government: 0, Private: 0, University: 0, International: 0 };
+                            (items || []).forEach(a => {
+                                if (a.source_type && typeCounts[a.source_type] !== undefined) {
+                                    typeCounts[a.source_type] += 1;
+                                    typeTotals[a.source_type] += (a.amount || 0);
+                                }
+                            });
+                            return allTypes.map(t => `
+                                <div class="bg-white p-4 rounded-xl border border-gray-200">
+                                    <div class="text-sm text-gray-500">${t}</div>
+                                    <div class="mt-1 text-lg font-semibold text-gray-900">${typeCounts[t]} allocations</div>
+                                    <div class="text-sm text-gray-600">${formatCurrency(typeTotals[t])}</div>
+                                </div>
+                            `).join('');
+                        })()}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Funding by Source Type</h3>
+                        <div id="funding-type-chart" class="h-80"></div>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Funding by Year</h3>
+                        <div id="funding-year-chart" class="h-80"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Top Funding Sources</h3>
+                        <div id="top-sources-chart" class="h-80"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-list mr-3 text-gray-600"></i>
+                        Funding Allocations (First ${items.length} of ${allocations.total})
+                    </h3>
+                    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grant #</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${items.map(a => `
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.source_name}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.source_type}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.project_title}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(a.amount)}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.grant_number || 'N/A'}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(a.start_date)} - ${a.end_date ? formatDate(a.end_date) : 'Present'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            reportBody.innerHTML = content;
+            showReport();
+
+            // Charts
+            let typeLabels, typeSeries;
+            if (selectedType) {
+                // Build from filtered allocations
+                const localByType = {};
+                items.forEach(a => { localByType[a.source_type] = (localByType[a.source_type] || 0) + (a.amount || 0); });
+                typeLabels = Object.keys(localByType);
+                typeSeries = typeLabels.map(k => localByType[k]);
+            } else {
+                typeLabels = Object.keys(summary.funding_by_type || {});
+                typeSeries = typeLabels.map(k => summary.funding_by_type[k]);
+            }
+            renderDonutChart('funding-type-chart', typeLabels, typeSeries);
+
+            let yearLabels, yearSeries;
+            if (selectedType) {
+                const localByYear = {};
+                items.forEach(a => {
+                    const y = new Date(a.start_date).getFullYear();
+                    localByYear[y] = (localByYear[y] || 0) + (a.amount || 0);
+                });
+                yearLabels = Object.keys(localByYear).sort();
+                yearSeries = yearLabels.map(k => localByYear[k]);
+            } else {
+                yearLabels = Object.keys(summary.funding_by_year || {}).sort();
+                yearSeries = yearLabels.map(k => summary.funding_by_year[k]);
+            }
+            renderBarChart('funding-year-chart', yearLabels, yearSeries);
+
+            const topNames = (summary.top_funding_sources || []).map(s => s.source_name);
+            const topAmounts = (summary.top_funding_sources || []).map(s => s.total_amount);
+            renderBarChart('top-sources-chart', topNames, topAmounts);
+        } catch (error) {
+            console.error('Error generating funding report:', error);
+            showNotification('Failed to generate report', 'error');
+            showNoData();
+        }
+    }
+
+    function renderDonutChart(elId, labels, series) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const options = {
+            series: series,
+            chart: { type: 'donut', height: 320 },
+            labels: labels,
+            colors: CONFIG.CHART_COLORS.slice(0, labels.length),
+            legend: { position: 'bottom' },
+            dataLabels: { enabled: true }
+        };
+        new ApexCharts(el, options).render();
+    }
+
+    function renderBarChart(elId, categories, data) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const options = {
+            series: [{ name: 'Amount', data }],
+            chart: { type: 'bar', height: 320, toolbar: { show: false } },
+            colors: [CONFIG.CHART_COLORS[5]],
+            plotOptions: { bar: { borderRadius: 6, horizontal: true } },
+            dataLabels: { enabled: false },
+            xaxis: { categories },
+            grid: { borderColor: '#f1f1f1' }
+        };
+        new ApexCharts(el, options).render();
+    }
     
     // Export report
     exportReportBtn.addEventListener('click', exportReport);
@@ -164,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // First, get faculty details
-            const facultyResponse = await fetch(CONFIG.API_BASE_URL + `${CONFIG.ENDPOINTS.FACULTY}/${facultyId}`);
+            const facultyResponse = await fetch(CONFIG.API_BASE_URL + CONFIG.ENDPOINTS.FACULTY + facultyId);
             let facultyMember = null;
             if (facultyResponse.ok) {
                 facultyMember = await facultyResponse.json();
@@ -660,101 +869,190 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function generatePublicationsReport() {
         const deptId = pubDeptSelect.value;
-        
         showLoading();
-        
         try {
-            // Build query parameters
             const params = new URLSearchParams();
-            
-            if (deptId) {
-                params.append('dept_id', deptId);
-            }
-            
-            // Fetch report data
+            if (deptId) params.append('dept_id', deptId);
+
             let endpoint = CONFIG.ENDPOINTS.REPORTS_PUBLICATIONS;
-            if (params.toString()) {
-                endpoint += `?${params.toString()}`;
-            }
-            
+            if (params.toString()) endpoint += `?${params.toString()}`;
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint);
-            let reportData = null;
-            if (response.ok) {
-                reportData = await response.json();
-            }
-            
-            if (!reportData || reportData.publications.length === 0) {
+            if (!response.ok) throw new Error('Failed to fetch publications report');
+            const reportData = await response.json();
+
+            const publications = reportData.publications || [];
+            if (publications.length === 0) {
                 showNoData();
                 return;
             }
-            
-            // Set title and subtitle
+
+            // Title and subtitle
             reportTitle.textContent = 'Research Publications Report';
-            
             if (deptId) {
                 const dept = departments.find(d => d.dept_id == deptId);
-                if (dept) {
-                    reportSubtitle.textContent = dept.dept_name;
-                } else {
-                    reportSubtitle.textContent = 'All Departments';
-                }
+                reportSubtitle.textContent = dept ? dept.dept_name : 'All Departments';
             } else {
                 reportSubtitle.textContent = 'All Departments';
             }
-            
-            // Generate report content
+
+            const totalPublications = reportData.summary?.total_publications || publications.length;
+            const totalCitations = reportData.summary?.total_citations || 0;
+            const byType = reportData.summary?.by_type || {};
+            const byYear = reportData.summary?.by_year || {};
+            const publicationsThisYear = (() => {
+                const y = new Date().getFullYear();
+                return byYear[y] || 0;
+            })();
+            const mostProductiveYear = (() => {
+                const entries = Object.entries(byYear);
+                if (entries.length === 0) return 'N/A';
+                entries.sort((a, b) => b[1] - a[1]);
+                return entries[0][0];
+            })();
+
+            // Build content
             let content = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-indigo-50 p-4 rounded-lg">
-                        <h3 class="text-xl font-bold text-indigo-800">${reportData.total_publications}</h3>
-                        <p class="text-indigo-600">Total Publications</p>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <h3 class="text-xl font-bold text-green-800">${reportData.publications_this_year}</h3>
-                        <p class="text-green-600">Publications This Year</p>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <h3 class="text-xl font-bold text-blue-800">${reportData.total_citations}</h3>
-                        <p class="text-blue-600">Total Citations</p>
-                    </div>
-                </div>
-            `;
-            
-            // Publications by year chart
-            content += `
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-3">Publications by Year</h3>
-                    <div id="publications-chart" class="h-80"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-book text-indigo-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-indigo-800">${totalPublications}</h4>
+                                    <p class="text-indigo-600 font-medium">Total Publications</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-quote-right text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-blue-800">${totalCitations}</h4>
+                                    <p class="text-blue-600 font-medium">Total Citations</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-green-800">${publicationsThisYear}</h4>
+                                    <p class="text-green-600 font-medium">This Year</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
+                            <div class="flex items-center mb-2">
+                                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                                    <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-2xl font-bold text-orange-800">${mostProductiveYear}</h4>
+                                    <p class="text-orange-600 font-medium">Most Productive Year</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Publications by Year</h3>
+                        <div id="publications-year-chart" class="h-80"></div>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Publications by Type</h3>
+                        <div id="publications-type-chart" class="h-80"></div>
+                    </div>
                 </div>
             `;
-            
+
+            // Top authors
+            if (reportData.top_authors && reportData.top_authors.length > 0) {
+                content += `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-tie mr-3 text-indigo-600"></i>
+                            Top Authors
+                        </h3>
+                        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publications</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Citations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${reportData.top_authors.map(a => `
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.name}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.department_name || 'N/A'}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.publications}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${a.citations}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
             // Publications list
             content += `
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold mb-3">Recent Publications</h3>
+                <div class="mb-2">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-list mr-3 text-gray-600"></i>
+                        Publications (${publications.length})
+                    </h3>
                     <div class="space-y-4">
-                        ${reportData.publications.map((pub, index) => `
-                            <div class="border-b pb-4">
-                                <h4 class="font-medium">${pub.title}</h4>
-                                <p class="text-sm text-gray-600">
-                                    ${pub.authors.join(', ')} • ${pub.journal} • ${pub.year}
-                                </p>
-                                <div class="flex items-center mt-2 text-sm text-gray-500">
-                                    <span class="mr-4"><i class="fas fa-quote-right mr-1"></i> ${pub.citations} citations</span>
-                                    <span><i class="fas fa-university mr-1"></i> ${getDepartmentName(pub.dept_id)}</span>
+                        ${publications.map(pub => `
+                            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900">${pub.title}</h4>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            ${pub.publication_type} ${pub.journal_name ? '• ' + pub.journal_name : ''} • ${formatDate(pub.publication_date)}
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            ${pub.project_title ? 'Project: ' + pub.project_title + ' • ' : ''}${pub.department_name || ''}
+                                        </p>
+                                        ${pub.authors && pub.authors.length ? `
+                                        <div class="mt-2 text-sm text-gray-700">
+                                            <span class="text-gray-500">Authors:</span> ${pub.authors.map(a => a.name).join(', ')}
+                                        </div>` : ''}
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                                            <i class="fas fa-quote-right mr-1"></i> ${pub.citation_count || 0} citations
+                                        </div>
+                                        ${pub.doi ? `<div class="mt-2 text-xs text-gray-500">DOI: ${pub.doi}</div>` : ''}
+                                    </div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
-            
-            // Set content and show report
+
             reportBody.innerHTML = content;
             showReport();
-            
-            // Render publications chart
-            renderPublicationsChart(reportData.publications_by_year);
+
+            // Render charts
+            renderPublicationsYearChart(byYear);
+            renderPublicationsTypeChart(byType);
         } catch (error) {
             console.error('Error generating publications report:', error);
             showNotification('Failed to generate report', 'error');
@@ -1035,75 +1333,39 @@ document.addEventListener('DOMContentLoaded', function() {
         chart.render();
     }
 
-    function renderPublicationsChart(yearData) {
-        const chartEl = document.getElementById('publications-chart');
+    function renderPublicationsYearChart(byYear) {
+        const chartEl = document.getElementById('publications-year-chart');
         if (!chartEl) return;
-        
-        const years = [];
-        const counts = [];
-        const citations = [];
-        
-        // Sort years
-        const sortedYears = Object.keys(yearData).sort();
-        
-        // Extract data
-        sortedYears.forEach(year => {
-            years.push(year);
-            counts.push(yearData[year].count);
-            citations.push(yearData[year].citations);
-        });
-        
-        // Create chart
-        const options = {
-            series: [
-                {
-                    name: 'Publications',
-                    type: 'column',
-                    data: counts
-                },
-                {
-                    name: 'Citations',
-                    type: 'line',
-                    data: citations
-                }
-            ],
-            chart: {
-                height: 350,
-                type: 'line',
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                width: [0, 4],
-                curve: 'smooth'
-            },
-            colors: [CONFIG.CHART_COLORS[0], CONFIG.CHART_COLORS[4]],
-            dataLabels: {
-                enabled: true,
-                enabledOnSeries: [1]
-            },
-            labels: years,
-            xaxis: {
-                type: 'category'
-            },
-            yaxis: [
-                {
-                    title: {
-                        text: 'Publications',
-                    },
-                },
-                {
-                    opposite: true,
-                    title: {
-                        text: 'Citations'
-                    }
-                }
-            ]
-        };
+        const years = Object.keys(byYear).sort();
+        const counts = years.map(y => byYear[y]);
 
-        const chart = new ApexCharts(chartEl, options);
-        chart.render();
+        const options = {
+            series: [{ name: 'Publications', data: counts }],
+            chart: { type: 'bar', height: 320, toolbar: { show: false } },
+            colors: [CONFIG.CHART_COLORS[0]],
+            plotOptions: { bar: { borderRadius: 6 } },
+            dataLabels: { enabled: false },
+            xaxis: { categories: years },
+            grid: { borderColor: '#f1f1f1' }
+        };
+        new ApexCharts(chartEl, options).render();
+    }
+
+    function renderPublicationsTypeChart(byType) {
+        const chartEl = document.getElementById('publications-type-chart');
+        if (!chartEl) return;
+        const labels = Object.keys(byType);
+        const series = labels.map(l => byType[l]);
+
+        const options = {
+            series: series,
+            chart: { type: 'donut', height: 320 },
+            labels: labels,
+            colors: CONFIG.CHART_COLORS.slice(0, labels.length),
+            legend: { position: 'bottom' },
+            dataLabels: { enabled: true }
+        };
+        new ApexCharts(chartEl, options).render();
     }
 
     function exportReport() {
