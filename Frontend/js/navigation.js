@@ -1,12 +1,12 @@
 // Navigation script for the Research Portal
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile menu toggle - new structure
-    const mobileMenuButton = document.querySelector('.mobile-menu-button');
-    const mobileMenu = document.querySelector('.mobile-menu');
+    // Mobile menu toggle - current navbar structure
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
     
-    if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener('click', () => {
+    if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
         });
     }
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Close mobile menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (mobileMenu && !mobileMenu.contains(e.target) && !mobileMenuButton?.contains(e.target)) {
+        if (mobileMenu && !mobileMenu.contains(e.target) && !mobileMenuToggle?.contains(e.target)) {
             mobileMenu.classList.add('hidden');
         }
     });
