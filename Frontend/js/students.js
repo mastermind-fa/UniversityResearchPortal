@@ -575,6 +575,12 @@ document.addEventListener('DOMContentLoaded', function() {
             advisor_id: advisorSelect && advisorSelect.value ? parseInt(advisorSelect.value) : null,
             graduation_date: graduationDateInput && graduationDateInput.value ? graduationDateInput.value : null
         };
+
+        // Ensure program_type aligns with backend constraint
+        if (!['Masters', 'PhD'].includes(studentData.program_type)) {
+            showNotification('Program Type must be either "Masters" or "PhD"', 'error');
+            return;
+        }
         
         const isEditing = studentIdInput && studentIdInput.value;
         

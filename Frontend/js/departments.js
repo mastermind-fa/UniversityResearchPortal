@@ -290,11 +290,49 @@ document.addEventListener('DOMContentLoaded', function() {
         if (departmentModal) departmentModal.classList.add('hidden');
     }
 
-    function saveDepartment(e) {
+    async function saveDepartment(e) {
         e.preventDefault();
-        // TODO: Implement save functionality
-        console.log('Save department functionality to be implemented');
-        closeModal();
+        console.log('💾 Saving department data...');
+        
+        const departmentData = {
+            dept_name: document.getElementById('dept-name').value.trim(),
+            budget: parseFloat(document.getElementById('dept-budget').value) || 0,
+            building: document.getElementById('dept-building').value.trim() || null,
+            head_faculty_id: parseInt(document.getElementById('dept-head-faculty').value) || null
+        };
+        
+        const isEditing = document.getElementById('dept-id') && document.getElementById('dept-id').value;
+        
+        try {
+            let endpoint = CONFIG.ENDPOINTS.DEPARTMENTS;
+            let method = 'POST';
+            
+            if (isEditing) {
+                endpoint = `${endpoint}/${document.getElementById('dept-id').value}`;
+                method = 'PUT';
+            }
+            
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(departmentData)
+            };
+            
+            await fetchAPI(endpoint, options);
+            
+            showNotification(
+                `Department ${isEditing ? 'updated' : 'created'} successfully`, 
+                'success'
+            );
+            
+            closeModal();
+            await loadDepartments();
+        } catch (error) {
+            console.error(`❌ Error ${isEditing ? 'updating' : 'creating'} department:`, error);
+            showNotification(`Failed to ${isEditing ? 'update' : 'create'} department`, 'error');
+        }
     }
 
     // Global functions for button clicks
@@ -315,15 +353,40 @@ Budget: ${dept.budget ? formatCurrency(dept.budget) : 'N/A'}
 
     window.editDepartment = function(deptId) {
         console.log('✏️ Edit department:', deptId);
-        // TODO: Implement edit functionality
-        alert('Edit functionality to be implemented');
+        const dept = currentDepartments.find(d => d.dept_id === deptId);
+        if (dept) {
+            // Populate form with existing data
+            if (document.getElementById('dept-id')) document.getElementById('dept-id').value = dept.dept_id;
+            if (document.getElementById('dept-name')) document.getElementById('dept-name').value = dept.dept_name || '';
+            if (document.getElementById('dept-budget')) document.getElementById('dept-budget').value = dept.budget || '';
+            if (document.getElementById('dept-building')) document.getElementById('dept-building').value = dept.building || '';
+            if (document.getElementById('dept-head-faculty')) document.getElementById('dept-head-faculty').value = dept.head_faculty_id || '';
+            
+            // Update modal title
+            if (modalTitle) modalTitle.textContent = 'Edit Department';
+            
+            // Show modal
+            if (departmentModal) departmentModal.classList.remove('hidden');
+        }
     };
 
-    window.deleteDepartment = function(deptId) {
+    window.deleteDepartment = async function(deptId) {
         console.log('🗑️ Delete department:', deptId);
-        // TODO: Implement delete functionality
         if (confirm('Are you sure you want to delete this department?')) {
-            alert('Delete functionality to be implemented');
+            try {
+                const endpoint = `${CONFIG.ENDPOINTS.DEPARTMENTS}/${deptId}`;
+                const options = {
+                    method: 'DELETE'
+                };
+                
+                await fetchAPI(endpoint, options);
+                
+                showNotification('Department deleted successfully', 'success');
+                await loadDepartments();
+            } catch (error) {
+                console.error('❌ Error deleting department:', error);
+                showNotification('Failed to delete department', 'error');
+            }
         }
     };
 });
