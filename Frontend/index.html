@@ -654,30 +654,9 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Mobile menu toggle (robust)
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        if (mobileMenuToggle && mobileMenu) {
-            mobileMenuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('hidden');
-                // Ensure visibility toggles even if Tailwind class conflicts
-                if (mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.style.display = 'none';
-                } else {
-                    mobileMenu.style.display = 'block';
-                }
-            });
-            // Click outside to close
-            document.addEventListener('click', function(ev) {
-                if (!mobileMenu.contains(ev.target) && !mobileMenuToggle.contains(ev.target)) {
-                    mobileMenu.classList.add('hidden');
-                    mobileMenu.style.display = 'none';
-                }
-            });
-        }
-        
+        // Mobile menu toggle is handled globally in js/navigation.js to avoid double-binding on index
+        // (no-op here to prevent toggling twice)
+
         // Back to top button
         const backToTopButton = document.getElementById('back-to-top');
         
