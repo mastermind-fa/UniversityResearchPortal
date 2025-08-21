@@ -19,6 +19,7 @@ class Student(Base):
     # Relationships
     department = relationship("Department", back_populates="students")
     advisor = relationship("Faculty", back_populates="advisees")
+    user_account = relationship("User", back_populates="student", uselist=False)
 
     # Constraints
     __table_args__ = (

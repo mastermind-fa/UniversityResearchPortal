@@ -36,12 +36,13 @@ def create_tables():
     try:
         from app.models import (
             departments, faculty, students, projects, 
-            publications, funding, collaborators, student_research
+            publications, funding, collaborators, student_research, auth
         )
         print("✅ All models imported successfully")
         
         # Check if tables exist
-        inspector = engine.dialect.inspector(engine)
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
         existing_tables = inspector.get_table_names()
         print(f"📊 Existing tables: {existing_tables}")
         

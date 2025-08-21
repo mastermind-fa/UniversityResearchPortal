@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - University Research Portal</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- FontAwesome Icons -->
+    <link href="https://site-assets.fontawesome.com/releases/v6.4.0/css/all.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white rounded-full p-2">
+                        <i class="fas fa-university text-blue-800 text-xl"></i>
+                    </div>
+                    <div>
+                        <a href="../index.html" class="text-xl font-bold hover:text-blue-200 transition-colors">
+                            University Research Portal
+                        </a>
+                        <p class="text-xs text-blue-200">Academic Excellence & Innovation</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="../index.html" class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <div class="relative group">
+                        <button class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                            <i class="fas fa-building"></i>
+                            <span>Structure</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <a href="departments.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-t-lg">
+                                <i class="fas fa-building mr-2"></i>Departments
+                            </a>
+                            <a href="faculty.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-chalkboard-teacher mr-2"></i>Faculty
+                            </a>
+                            <a href="students.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-b-lg">
+                                <i class="fas fa-user-graduate mr-2"></i>Students
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <button class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                            <i class="fas fa-flask"></i>
+                            <span>Research</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <a href="projects.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-t-lg">
+                                <i class="fas fa-project-diagram mr-2"></i>Projects
+                            </a>
+                            <a href="publications.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-book mr-2"></i>Publications
+                            </a>
+                            <a href="funding.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-dollar-sign mr-2"></i>Funding
+                            </a>
+                            <a href="collaborators.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
+                                <i class="fas fa-handshake mr-2"></i>Collaborators
+                            </a>
+                            <a href="student-research.html" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded-b-lg">
+                                <i class="fas fa-user-cog mr-2"></i>Student Research
+                            </a>
+                        </div>
+                    </div>
+                    <a href="reports.html" class="nav-link hover:text-blue-200 transition-colors flex items-center space-x-1">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="auth-buttons hidden lg:flex items-center space-x-3">
+                    <button onclick="auth.showAuthModal('login')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button onclick="auth.showAuthModal('register')" class="bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="profile-section hidden lg:flex items-center space-x-3">
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="profile-name">User</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <div class="p-4 border-b border-gray-200">
+                                <p class="profile-name font-semibold text-gray-800">User Name</p>
+                                <p class="profile-email text-sm text-gray-600">user@email.com</p>
+                                <p class="profile-type text-xs text-blue-600 font-medium">User Type</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="profile.html" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <button onclick="auth.logout()" class="w-full text-left px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors rounded">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <div class="lg:hidden">
+                    <button id="mobile-menu-toggle" class="focus:outline-none hover:text-blue-200 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="lg:hidden hidden pb-4 border-t border-blue-700">
+                <div class="space-y-2 pt-4">
+                    <a href="../index.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    
+                    <!-- Structure Section -->
+                    <div class="border-b border-blue-700 pb-2">
+                        <p class="text-blue-300 text-sm font-semibold px-4 py-1">Structure</p>
+                        <a href="departments.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-building mr-2"></i>Departments
+                        </a>
+                        <a href="faculty.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Faculty
+                        </a>
+                        <a href="students.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user-graduate mr-2"></i>Students
+                        </a>
+                    </div>
+
+                    <!-- Research Section -->
+                    <div class="border-b border-blue-700 pb-2">
+                        <p class="text-blue-300 text-sm font-semibold px-4 py-1">Research</p>
+                        <a href="projects.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-project-diagram mr-2"></i>Projects
+                        </a>
+                        <a href="publications.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-book mr-2"></i>Publications
+                        </a>
+                        <a href="funding.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-dollar-sign mr-2"></i>Funding
+                        </a>
+                        <a href="collaborators.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-handshake mr-2"></i>Collaborators
+                        </a>
+                        <a href="student-research.html" class="block py-2 px-6 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user-cog mr-2"></i>Student Research
+                        </a>
+                    </div>
+
+                    <a href="reports.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition-colors">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </a>
+
+                    <!-- Mobile Auth Buttons -->
+                    <div class="auth-buttons pt-4 space-y-2">
+                        <button onclick="auth.showAuthModal('login')" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                        <button onclick="auth.showAuthModal('register')" class="w-full bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </div>
+
+                    <!-- Mobile Profile Section -->
+                    <div class="profile-section hidden pt-4 space-y-2">
+                        <div class="px-4 py-2 bg-blue-700 rounded-lg">
+                            <p class="profile-name font-semibold">User Name</p>
+                            <p class="profile-email text-sm text-blue-200">user@email.com</p>
+                            <p class="profile-type text-xs text-blue-300">User Type</p>
+                        </div>
+                        <a href="profile.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <button onclick="auth.logout()" class="w-full text-left py-2 px-4 hover:bg-red-700 rounded transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">User Profile</h1>
+            <p class="text-gray-600">Manage your account information and preferences</p>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Profile Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-circle text-4xl text-blue-600"></i>
+                        </div>
+                        <h3 class="profile-name text-xl font-semibold text-gray-800">User Name</h3>
+                        <p class="profile-email text-gray-600">user@email.com</p>
+                        <span class="profile-type inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full mt-2">User Type</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-calendar-alt w-5 mr-3"></i>
+                            <span>Member since: <span class="profile-created-date">-</span></span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-shield-alt w-5 mr-3"></i>
+                            <span>Status: <span class="text-green-600 font-medium">Active</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md">
+                    <!-- Profile Tabs -->
+                    <div class="border-b border-gray-200">
+                        <nav class="flex space-x-8 px-6">
+                            <button class="profile-tab active py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium" data-tab="personal">
+                                Personal Information
+                            </button>
+                            <button class="profile-tab py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium" data-tab="academic">
+                                Academic Details
+                            </button>
+                            <button class="profile-tab py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium" data-tab="security">
+                                Security
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Personal Information Tab -->
+                        <div id="personal-tab" class="profile-tab-content">
+                            <form id="personal-form" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                        <input type="text" name="first_name" class="profile-first-name w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                        <input type="text" name="last_name" class="profile-last-name w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" name="email" class="profile-email-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" readonly>
+                                    <p class="text-sm text-gray-500 mt-1">Email cannot be changed</p>
+                                </div>
+
+                                <div class="profile-phone-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    <input type="tel" name="phone" class="profile-phone w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+
+                                <div class="profile-research-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Research Interests</label>
+                                    <textarea name="research_interests" rows="3" class="profile-research-interests w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                        <i class="fas fa-save mr-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Academic Details Tab -->
+                        <div id="academic-tab" class="profile-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="profile-position-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Position</label>
+                                    <input type="text" class="profile-position w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+
+                                <div class="profile-program-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Program Type</label>
+                                    <input type="text" class="profile-program w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+
+                                <div class="profile-department-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                                    <input type="text" class="profile-department w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+
+                                <div class="profile-hire-date-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Hire Date</label>
+                                    <input type="text" class="profile-hire-date w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+
+                                <div class="profile-enrollment-date-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Enrollment Date</label>
+                                    <input type="text" class="profile-enrollment-date w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+
+                                <div class="profile-advisor-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Advisor</label>
+                                    <input type="text" class="profile-advisor w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div id="security-tab" class="profile-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex">
+                                        <i class="fas fa-exclamation-triangle text-yellow-400 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="text-sm font-medium text-yellow-800">Password Change</h4>
+                                            <p class="text-sm text-yellow-700 mt-1">To change your password, please contact the system administrator.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex">
+                                        <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="text-sm font-medium text-blue-800">Account Security</h4>
+                                            <p class="text-sm text-blue-700 mt-1">Your account is protected with industry-standard security measures.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <p>&copy; 2024 University Research Portal. All rights reserved.</p>
+                <p class="text-gray-400 mt-2">Advancing Knowledge Through Collaborative Research & Innovation</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for auth to finish validating token if needed
+            if (window.authReady && typeof window.authReady.then === 'function') {
+                try { await window.authReady; } catch (_) {}
+            } else if (window.auth && typeof window.auth.validateToken === 'function' && window.auth.token && !window.auth.currentUser) {
+                try { await window.auth.validateToken(); } catch (_) {}
+            }
+
+            // Check if user is authenticated after readiness
+            if (!auth || !auth.isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            // Load user profile data
+            loadProfileData();
+
+            // Setup tab switching
+            setupTabs();
+
+            // Setup form submission
+            setupFormSubmission();
+        });
+
+        function loadProfileData() {
+            // Get profile data from auth system
+            const user = auth.getCurrentUser();
+            if (!user) return;
+
+            // Update profile display
+            document.querySelectorAll('.profile-name').forEach(el => {
+                el.textContent = `${user.first_name || 'User'} ${user.last_name || ''}`;
+            });
+
+            document.querySelectorAll('.profile-email').forEach(el => {
+                el.textContent = user.email;
+            });
+
+            document.querySelectorAll('.profile-type').forEach(el => {
+                el.textContent = user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1);
+            });
+
+            // Update form fields
+            if (user.first_name) document.querySelector('.profile-first-name').value = user.first_name;
+            if (user.last_name) document.querySelector('.profile-last-name').value = user.last_name;
+            if (user.phone) document.querySelector('.profile-phone').value = user.phone;
+            if (user.research_interests) document.querySelector('.profile-research-interests').value = user.research_interests;
+
+            // Update academic fields
+            if (user.position) document.querySelector('.profile-position').value = user.position;
+            if (user.program_type) document.querySelector('.profile-program').value = user.program_type;
+            if (user.dept_name) document.querySelector('.profile-department').value = user.dept_name;
+            if (user.hire_date) document.querySelector('.profile-hire-date').value = user.hire_date;
+            if (user.enrollment_date) document.querySelector('.profile-enrollment-date').value = user.enrollment_date;
+            if (user.advisor_name) document.querySelector('.profile-advisor').value = user.advisor_name;
+
+            // Show/hide fields based on user type
+            if (user.user_type === 'faculty') {
+                document.querySelectorAll('.profile-phone-field, .profile-research-field, .profile-position-field, .profile-hire-date-field').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.profile-program-field, .profile-enrollment-date-field, .profile-advisor-field').forEach(el => el.style.display = 'none');
+            } else if (user.user_type === 'student') {
+                document.querySelectorAll('.profile-phone-field, .profile-program-field, .profile-enrollment-date-field, .profile-advisor-field').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.profile-research-field, .profile-position-field, .profile-hire-date-field').forEach(el => el.style.display = 'none');
+            }
+
+            // Update created date
+            if (user.created_at) {
+                const date = new Date(user.created_at);
+                document.querySelectorAll('.profile-created-date').forEach(el => {
+                    el.textContent = date.toLocaleDateString();
+                });
+            }
+        }
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.profile-tab');
+            const tabContents = document.querySelectorAll('.profile-tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+
+                    // Update active tab
+                    tabs.forEach(t => {
+                        t.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                        t.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    tab.classList.add('active', 'border-blue-500', 'text-blue-600');
+                    tab.classList.remove('border-transparent', 'text-gray-500');
+
+                    // Show target content
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`${targetTab}-tab`).classList.remove('hidden');
+                });
+            });
+        }
+
+        function setupFormSubmission() {
+            const form = document.getElementById('personal-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const updateData = {
+                    first_name: formData.get('first_name'),
+                    last_name: formData.get('last_name')
+                };
+
+                // Add optional fields based on user type
+                const user = auth.getCurrentUser();
+                if (user.user_type === 'faculty') {
+                    if (formData.get('phone')) updateData.phone = formData.get('phone');
+                    if (formData.get('research_interests')) updateData.research_interests = formData.get('research_interests');
+                }
+
+                try {
+                    const response = await fetch('http://localhost:8000/api/auth/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.token}`
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+
+                    if (response.ok) {
+                        const updatedProfile = await response.json();
+                        
+                        // Update local user data
+                        auth.currentUser = updatedProfile;
+                        
+                        // Show success message
+                        auth.showNotification('Profile updated successfully!', 'success');
+                        
+                        // Reload profile data
+                        loadProfileData();
+                    } else {
+                        const errorData = await response.json();
+                        auth.showNotification(errorData.detail || 'Update failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Profile update error:', error);
+                    auth.showNotification('Network error. Please try again.', 'error');
+                }
+            });
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+
+    <style>
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #93C5FD;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .profile-tab.active {
+            border-bottom-color: #3B82F6;
+            color: #2563EB;
+        }
+
+        .profile-tab:hover {
+            border-bottom-color: #D1D5DB;
+            color: #374151;
+        }
+    </style>
+</body>
+</html>

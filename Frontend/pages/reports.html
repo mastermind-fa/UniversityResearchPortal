@@ -187,13 +187,39 @@
                 </div>
 
                 <!-- Auth Buttons -->
-                <div class="hidden lg:flex items-center space-x-3">
-                    <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                <div class="auth-buttons hidden lg:flex items-center space-x-3">
+                    <button onclick="auth.showAuthModal('login')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </button>
-                    <button class="bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                    <button onclick="auth.showAuthModal('register')" class="bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
                         <i class="fas fa-user-plus mr-2"></i>Register
                     </button>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="profile-section hidden lg:flex items-center space-x-3">
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="profile-name">User</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <div class="p-4 border-b border-gray-200">
+                                <p class="profile-name font-semibold text-gray-800">User Name</p>
+                                <p class="profile-email text-sm text-gray-600">user@email.com</p>
+                                <p class="profile-type text-xs text-blue-600 font-medium">User Type</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="profile.html" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <button onclick="auth.logout()" class="w-full text-left px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors rounded">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Toggle -->
@@ -250,12 +276,27 @@
                     </a>
 
                     <!-- Mobile Auth Buttons -->
-                    <div class="pt-4 space-y-2">
-                        <button class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                    <div class="auth-buttons pt-4 space-y-2">
+                        <button onclick="auth.showAuthModal('login')" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
                         </button>
-                        <button class="w-full bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <button onclick="auth.showAuthModal('register')" class="w-full bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
                             <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </div>
+
+                    <!-- Mobile Profile Section -->
+                    <div class="profile-section hidden pt-4 space-y-2">
+                        <div class="px-4 py-2 bg-blue-700 rounded-lg">
+                            <p class="profile-name font-semibold">User Name</p>
+                            <p class="profile-email text-sm text-blue-200">user@email.com</p>
+                            <p class="profile-type text-xs text-blue-300">User Type</p>
+                        </div>
+                        <a href="profile.html" class="block py-2 px-4 hover:bg-blue-700 rounded transition-colors">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <button onclick="auth.logout()" class="w-full text-left py-2 px-4 hover:bg-red-700 rounded transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </button>
                     </div>
                 </div>
@@ -476,6 +517,7 @@
     </div>    
 
     <!-- Scripts -->
+    <script src="../js/auth.js"></script>
     <script src="../js/config.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/navigation.js"></script>

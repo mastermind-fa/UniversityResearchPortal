@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     departments, faculty, students, projects, publications, 
-    funding, collaborators, student_research, analytics, reports
+    funding, collaborators, student_research, analytics, reports, auth
 )
 from app.db.session import create_tables
 
@@ -34,6 +34,7 @@ async def startup():
         traceback.print_exc()
 
 # Include API routes
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(departments.router, prefix="/api", tags=["departments"])
 app.include_router(faculty.router, prefix="/api", tags=["faculty"])
 app.include_router(students.router, prefix="/api", tags=["students"])

@@ -8,6 +8,7 @@ from .student_research import StudentResearch
 from .publications import Publication
 from .publication_authors import PublicationAuthor
 from .funding import FundingSource, ProjectFunding
+from .auth import User
 
 __all__ = [
     "Department",
@@ -19,5 +20,6 @@ __all__ = [
     "Publication",
     "PublicationAuthor",
     "FundingSource",
-    "ProjectFunding"
+    "ProjectFunding",
+    "User"
 ]

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test - University Research Portal</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link href="https://site-assets.fontawesome.com/releases/v6.4.0/css/all.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white rounded-full p-2">
+                        <i class="fas fa-university text-blue-800 text-xl"></i>
+                    </div>
+                    <div>
+                        <a href="index.html" class="text-xl font-bold hover:text-blue-200 transition-colors">
+                            University Research Portal
+                        </a>
+                        <p class="text-xs text-blue-200">Academic Excellence & Innovation</p>
+                    </div>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="auth-buttons flex items-center space-x-3">
+                    <button onclick="auth.showAuthModal('login')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button onclick="auth.showAuthModal('register')" class="bg-white text-blue-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="profile-section hidden flex items-center space-x-3">
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="profile-name">User</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <div class="p-4 border-b border-gray-200">
+                                <p class="profile-name font-semibold text-gray-800">User Name</p>
+                                <p class="profile-email text-sm text-gray-600">user@email.com</p>
+                                <p class="profile-type text-xs text-blue-600 font-medium">User Type</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="pages/profile.html" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors rounded">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <button onclick="auth.logout()" class="w-full text-left px-3 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors rounded">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Authentication Test Page</h1>
+            <p class="text-gray-600 mb-8">This page tests the authentication system functionality</p>
+            
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Current Status</h2>
+                
+                <div id="auth-status" class="text-left space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-gray-600">Authentication:</span>
+                        <span id="auth-status-text" class="font-medium text-red-600">Not Authenticated</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <span class="text-gray-600">User Type:</span>
+                        <span id="user-type-text" class="font-medium text-gray-800">-</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <span class="text-gray-600">Email:</span>
+                        <span id="user-email-text" class="font-medium text-gray-800">-</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6 space-y-3">
+                    <button onclick="testLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Test Login (Admin)
+                    </button>
+                    
+                    <button onclick="testLogout()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                        Test Logout
+                    </button>
+                    
+                    <button onclick="checkAuth()" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">
+                        Check Auth Status
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script>
+        // Update auth status display
+        function updateAuthDisplay() {
+            const authStatus = document.getElementById('auth-status-text');
+            const userType = document.getElementById('user-type-text');
+            const userEmail = document.getElementById('user-email-text');
+            
+            if (auth.isAuthenticated()) {
+                const user = auth.getCurrentUser();
+                authStatus.textContent = 'Authenticated';
+                authStatus.className = 'font-medium text-green-600';
+                userType.textContent = user.user_type || 'Unknown';
+                userEmail.textContent = user.email || 'Unknown';
+            } else {
+                authStatus.textContent = 'Not Authenticated';
+                authStatus.className = 'font-medium text-red-600';
+                userType.textContent = '-';
+                userEmail.textContent = '-';
+            }
+        }
+        
+        // Test login function
+        async function testLogin() {
+            try {
+                const success = await auth.login('admin@gmail.com', 'admin123');
+                if (success) {
+                    updateAuthDisplay();
+                    console.log('Login successful');
+                } else {
+                    console.log('Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+            }
+        }
+        
+        // Test logout function
+        function testLogout() {
+            auth.logout();
+            updateAuthDisplay();
+            console.log('Logout successful');
+        }
+        
+        // Check auth status
+        function checkAuth() {
+            updateAuthDisplay();
+            console.log('Current user:', auth.getCurrentUser());
+            console.log('Is authenticated:', auth.isAuthenticated());
+        }
+        
+        // Update display when auth state changes
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthDisplay();
+            
+            // Listen for auth state changes
+            setInterval(updateAuthDisplay, 1000);
+        });
+    </script>
+</body>
+</html>
